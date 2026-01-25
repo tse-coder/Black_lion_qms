@@ -1,157 +1,84 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { SocketProvider } from './context/SocketContext';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import PatientDashboard from './pages/patient/PatientDashboard';
-import DoctorDashboard from './pages/doctor/DoctorDashboard';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import PublicDisplay from './pages/public/PublicDisplay';
-import './assets/index.css';
-import type { ReactNode } from 'react';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-  requiredRole?: string;
-}
+// Pages
+import LandingPage from "./pages/LandingPage";
+import CheckInPage from "./pages/CheckInPage";
+import DisplayPage from "./pages/DisplayPage";
+import LoginPage from "./pages/LoginPage";
+import DoctorDashboard from "./pages/DoctorDashboard";
+import LabDashboard from "./pages/LabDashboard";
+import PatientDashboard from "./pages/PatientDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
+import NotFound from "./pages/NotFound";
 
-interface PublicRouteProps {
-  children: ReactNode;
-}
+const queryClient = new QueryClient();
 
-// Protected route component
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
-  const { user, loading, isAuthenticated } = useAuth();
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/check-in" element={<CheckInPage />} />
+              <Route path="/display" element={<DisplayPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-healthcare-blue mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+              {/* Protected Routes */}
+              <Route
+                path="/doctor"
+                element={
+                  <ProtectedRoute allowedRoles="Doctor">
+                    <DoctorDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/lab"
+                element={
+                  <ProtectedRoute allowedRoles="Lab Technician">
+                    <LabDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/patient"
+                element={
+                  <ProtectedRoute allowedRoles="Patient">
+                    <PatientDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute allowedRoles="Admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-
-  if (requiredRole && user?.role !== requiredRole) {
-    // Redirect to appropriate dashboard based on user role
-    const rolePath = user?.role?.toLowerCase().replace(' ', '-') || 'patient';
-    return <Navigate to={`/${rolePath}/dashboard`} />;
-  }
-
-  return children;
-};
-
-// Public route (redirect to dashboard if authenticated)
-const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
-  const { user, loading, isAuthenticated } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-healthcare-blue mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    const rolePath = user?.role?.toLowerCase().replace(' ', '-') || 'patient';
-    return <Navigate to={`/${rolePath}/dashboard`} />;
-  }
-
-  return children;
-};
-
-function App() {
-  return (
-    <AuthProvider>
-      <SocketProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route 
-              path="/login" 
-              element={
-                <PublicRoute>
-                  <LoginPage />
-                </PublicRoute>
-              } 
-            />
-            
-            <Route 
-              path="/register" 
-              element={
-                <PublicRoute>
-                  <RegisterPage />
-                </PublicRoute>
-              } 
-            />
-            
-            <Route 
-              path="/public-display" 
-              element={<PublicDisplay />} 
-            />
-
-            {/* Protected Routes */}
-            <Route 
-              path="/patient/dashboard" 
-              element={
-                <ProtectedRoute requiredRole="Patient">
-                  <PatientDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/doctor/dashboard" 
-              element={
-                <ProtectedRoute requiredRole="Doctor">
-                  <DoctorDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/lab/dashboard" 
-              element={
-                <ProtectedRoute requiredRole="Lab Technician">
-                  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                    <div className="text-center">
-                      <h1 className="text-2xl font-bold text-gray-900 mb-4">Lab Dashboard</h1>
-                      <p className="text-gray-600">Lab Technician dashboard coming soon...</p>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/admin/dashboard" 
-              element={
-                <ProtectedRoute requiredRole="Admin">
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-
-            {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/login" />} />
-            
-            {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/login" />} />
-          </Routes>
-        </Router>
-      </SocketProvider>
-    </AuthProvider>
-  );
-}
+              {/* Catch-all */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </LanguageProvider>
+  </QueryClientProvider>
+);
 
 export default App;
