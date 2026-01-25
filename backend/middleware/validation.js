@@ -81,6 +81,14 @@ const queueSchema = Joi.object({
 // Validation middleware factory
 const validate = (schema) => {
   return (req, res, next) => {
+    // Check if req.body exists
+    if (!req.body || typeof req.body !== 'object') {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'Request body is missing or invalid. Make sure Content-Type is application/json',
+      });
+    }
+    
     const { error } = schema.validate(req.body, { abortEarly: false });
     
     if (error) {

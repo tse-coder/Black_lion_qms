@@ -26,13 +26,6 @@ const login = async (req, res) => {
     // Find user by email
     const user = await db.User.findOne({
       where: { email },
-      include: [
-        {
-          model: db.Patient,
-          as: 'patientProfile',
-          required: false,
-        },
-      ],
     });
 
     if (!user) {
@@ -52,6 +45,7 @@ const login = async (req, res) => {
 
     // Validate password
     const isValidPassword = await user.validatePassword(password);
+    
     if (!isValidPassword) {
       return res.status(401).json({
         error: 'Authentication Failed',

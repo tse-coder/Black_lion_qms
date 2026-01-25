@@ -77,6 +77,44 @@ api.interceptors.response.use(
 
 ## Authentication Endpoints
 
+### POST /auth/register
+**Description:** User registration
+**Public Endpoint:** No authentication required
+
+**Request Body:**
+```json
+{
+  "username": "testuser123",
+  "email": "user@example.com",
+  "password": "password123",
+  "role": "Patient|Doctor|Lab Technician|Admin",
+  "firstName": "John",
+  "lastName": "Doe",
+  "phoneNumber": "+251912345678"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "user": {
+      "id": "uuid",
+      "username": "testuser123",
+      "email": "user@example.com",
+      "role": "Patient",
+      "firstName": "John",
+      "lastName": "Doe",
+      "phoneNumber": "+251912345678",
+      "isActive": true,
+      "createdAt": "2024-01-25T10:30:00.000Z"
+    }
+  }
+}
+```
+
 ### POST /auth/login
 **Description:** User login with email and password
 **Public Endpoint:** No authentication required
@@ -106,9 +144,7 @@ api.interceptors.response.use(
       "lastLogin": "2024-01-25T10:30:00.000Z"
     },
     "token": "jwt_token_here",
-    "expiresIn": "24h",
-    "dashboard": "/patient/dashboard",
-    "permissions": ["view_own_queues", "join_queue"]
+    "expiresIn": "24h"
   }
 }
 ```
@@ -129,7 +165,9 @@ api.interceptors.response.use(
       "role": "Patient",
       "firstName": "John",
       "lastName": "Doe",
-      "phoneNumber": "+251912345678"
+      "phoneNumber": "+251912345678",
+      "isActive": true,
+      "lastLogin": "2024-01-25T10:30:00.000Z"
     }
   }
 }
@@ -144,6 +182,51 @@ api.interceptors.response.use(
 {
   "success": true,
   "message": "Logout successful"
+}
+```
+
+### POST /auth/create-patient-profile
+**Description:** Create patient profile for authenticated user
+**Authentication:** Required (Patient role)
+
+**Request Body:**
+```json
+{
+  "cardNumber": "CARD-001",
+  "medicalRecordNumber": "MRN-2023-001",
+  "dateOfBirth": "1985-05-15",
+  "gender": "Male|Female|Other",
+  "address": "123 Main St, Addis Ababa",
+  "emergencyContactName": "Emergency Contact",
+  "emergencyContactPhone": "+251912345678",
+  "bloodType": "A+|A-|B+|B-|AB+|AB-|O+|O-",
+  "allergies": "Penicillin, Peanuts",
+  "chronicConditions": "Hypertension"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Patient profile created successfully",
+  "data": {
+    "patient": {
+      "id": "uuid",
+      "cardNumber": "CARD-001",
+      "medicalRecordNumber": "MRN-2023-001",
+      "dateOfBirth": "1985-05-15",
+      "gender": "Male",
+      "address": "123 Main St, Addis Ababa",
+      "emergencyContactName": "Emergency Contact",
+      "emergencyContactPhone": "+251912345678",
+      "bloodType": "O+",
+      "allergies": "Penicillin, Peanuts",
+      "chronicConditions": "Hypertension",
+      "userId": "user_uuid",
+      "createdAt": "2024-01-25T10:30:00.000Z"
+    }
+  }
 }
 ```
 
