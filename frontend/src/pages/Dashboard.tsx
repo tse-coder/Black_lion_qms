@@ -97,7 +97,9 @@ const Dashboard: React.FC<DashboardProps> = ({ role }) => {
     email: 'user@example.com',
     role,
     firstName: 'Test',
-    lastName: 'User'
+    lastName: 'User',
+    username: 'testuser',
+    isActive: true
   };
 
   return (

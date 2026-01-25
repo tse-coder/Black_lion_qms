@@ -17,10 +17,15 @@ export type TranslationKeys =
   | 'firstName' | 'lastName' | 'phoneNumber' | 'dateOfBirth' | 'gender' 
   | 'address' | 'department' | 'active' | 'inactive' | 'pending' | 'completed' 
   | 'cancelled' | 'inProgress' | 'today' | 'yesterday' | 'tomorrow' | 'thisWeek' 
-  | 'thisMonth' | 'noDataFound' | 'confirmDelete' | 'operationSuccessful' | 'operationFailed';
+  | 'thisMonth' | 'noDataFound' | 'confirmDelete' | 'operationSuccessful' | 'operationFailed'
+  | 'signUp' | 'createAccount' | 'username' | 'confirmPassword' | 'role' | 'register'
+  | 'registrationSuccess' | 'alreadyHaveAccount' | 'selectRole' | 'patientRole' | 'doctorRole'
+  | 'labTechnicianRole' | 'adminRole' | 'passwordMismatch' | 'usernameRequired' | 'phoneRequired'
+  | 'phoneInvalid' | 'roleRequired';
 
 const translations: Record<Language, Record<TranslationKeys, string>> = {
   en: {
+    // Common
     login: 'Login',
     logout: 'Logout',
     dashboard: 'Dashboard',
@@ -40,18 +45,46 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     error: 'Error',
     success: 'Success',
     welcome: 'Welcome',
+    
+    // Auth
     signIn: 'Sign In',
     signOut: 'Sign Out',
+    signUp: 'Sign Up',
+    createAccount: 'Create Account',
+    register: 'Register',
     email: 'Email',
     password: 'Password',
+    confirmPassword: 'Confirm Password',
+    username: 'Username',
     forgotPassword: 'Forgot Password?',
     rememberMe: 'Remember Me',
     loginFailed: 'Login failed. Please try again.',
     invalidCredentials: 'Invalid email or password.',
+    registrationSuccess: 'Registration successful! Please login.',
+    alreadyHaveAccount: 'Already have an account?',
+    
+    // Role Selection
+    role: 'Role',
+    selectRole: 'Select Role',
+    patientRole: 'Patient',
+    doctorRole: 'Doctor',
+    labTechnicianRole: 'Lab Technician',
+    adminRole: 'Admin',
+    roleRequired: 'Role is required',
+    
+    // Validation
+    passwordMismatch: 'Passwords do not match',
+    usernameRequired: 'Username is required',
+    phoneRequired: 'Phone number is required',
+    phoneInvalid: 'Phone number must be in Ethiopian format (+2519xxxxxxxx)',
+    
+    // Navigation
     home: 'Home',
     profile: 'Profile',
     notifications: 'Notifications',
     help: 'Help',
+    
+    // Queue Management
     queueStatus: 'Queue Status',
     currentTicket: 'Current Ticket',
     nextTicket: 'Next Ticket',
@@ -59,25 +92,35 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     patientsInQueue: 'Patients in Queue',
     averageWaitTime: 'Average Wait Time',
     nowServing: 'Now Serving',
+    
+    // Patient Portal
     myAppointments: 'My Appointments',
     bookAppointment: 'Book Appointment',
     medicalHistory: 'Medical History',
     testResults: 'Test Results',
     prescriptions: 'Prescriptions',
+    
+    // Doctor Portal
     patientList: 'Patient List',
     todaysAppointments: "Today's Appointments",
     patientRecords: 'Patient Records',
     prescribeMedication: 'Prescribe Medication',
     orderTests: 'Order Tests',
+    
+    // Lab Portal
     testQueue: 'Test Queue',
     pendingTests: 'Pending Tests',
     completedTests: 'Completed Tests',
     sampleCollection: 'Sample Collection',
+    
+    // Admin Portal
     userManagement: 'User Management',
     systemSettings: 'System Settings',
     reports: 'Reports',
     analytics: 'Analytics',
     exportData: 'Export Data',
+    
+    // Forms
     firstName: 'First Name',
     lastName: 'Last Name',
     phoneNumber: 'Phone Number',
@@ -85,17 +128,23 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     gender: 'Gender',
     address: 'Address',
     department: 'Department',
+    
+    // Status
     active: 'Active',
     inactive: 'Inactive',
     pending: 'Pending',
     completed: 'Completed',
     cancelled: 'Cancelled',
     inProgress: 'In Progress',
+    
+    // Time
     today: 'Today',
     yesterday: 'Yesterday',
     tomorrow: 'Tomorrow',
     thisWeek: 'This Week',
     thisMonth: 'This Month',
+    
+    // Messages
     noDataFound: 'No data found',
     confirmDelete: 'Are you sure you want to delete this item?',
     operationSuccessful: 'Operation completed successfully',
@@ -123,12 +172,34 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     welcome: 'እንኳን ደህና መጡ',
     signIn: 'ይግቡ',
     signOut: 'ይውጡ',
+    signUp: 'ይመዝገቡ',
+    createAccount: 'መለያ ይፍጠሩ',
+    register: 'ይመዝገቡ',
     email: 'ኢሜይል',
     password: 'የይለፍ ቃል',
+    confirmPassword: 'የይለፍ ቃል ያረጋግጡ',
+    username: 'የተጠቃሚ ስም',
     forgotPassword: 'የይለፍ ቃልዎን ረስተዋል?',
     rememberMe: 'አስታውሰኝ',
     loginFailed: 'መግቢያው አልተሳካም። እባክዎ እንደገና ይሞክሩ።',
     invalidCredentials: 'የተሳሳተ ኢሜይል ወይም የይለፍ ቃል።',
+    registrationSuccess: 'ምዝገባ ተሳክቷል! እባክዎ ይግቡ።',
+    alreadyHaveAccount: 'መለያ አለዎት?',
+    
+    // Role Selection
+    role: 'ሚናው',
+    selectRole: 'ሚና ይምረጡ',
+    patientRole: 'ታካሚ',
+    doctorRole: 'ሐኪም',
+    labTechnicianRole: 'ላብ ቴክኒሻን',
+    adminRole: 'አስተዳዳሪ',
+    roleRequired: 'ሚና ያስፈልጋል',
+    
+    // Validation
+    passwordMismatch: 'የይለፍ ቃሎች አይደሉም',
+    usernameRequired: 'የተጠቃሚ ስም ያስፈልጋል',
+    phoneRequired: 'ስልክ ቁጥር ያስፈልጋል',
+    phoneInvalid: 'ስልክ ቁጥር በኢትዮጵያ ቅርጸት (+2519xxxxxxxx) መሆን አለበት',
     home: 'መነሻ',
     profile: 'መገለጫ',
     notifications: 'ማሳወቂያዎች',
@@ -159,6 +230,8 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     reports: 'ሪፖርቶች',
     analytics: 'ትንታኔ',
     exportData: 'መረጃ ላክ',
+    
+    // Forms
     firstName: 'ስም',
     lastName: 'የአያት ስም',
     phoneNumber: 'ስልክ ቁጥር',
@@ -166,17 +239,23 @@ const translations: Record<Language, Record<TranslationKeys, string>> = {
     gender: 'ጾታ',
     address: 'አድራሻ',
     department: 'ክፍል',
+    
+    // Status
     active: 'ንቁ',
     inactive: 'ያልነቃ',
     pending: 'በጥበቃ ላይ',
     completed: 'ተጠናቋል',
     cancelled: 'ተሰርዟል',
     inProgress: 'በሂደት ላይ',
+    
+    // Time
     today: 'ዛሬ',
     yesterday: 'ትናንት',
     tomorrow: 'ነገ',
     thisWeek: 'በዚህ ሳምንት',
     thisMonth: 'በዚህ ወር',
+    
+    // Messages
     noDataFound: 'ምንም መረጃ አልተገኘም',
     confirmDelete: 'ይህንን መረጃ ለማጥፋት እርግጠኛ ነዎት?',
     operationSuccessful: 'ክንውኑ በተሳካ ሁኔታ ተጠናቅቋል',

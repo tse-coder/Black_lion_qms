@@ -2,11 +2,43 @@ import React, { useState, useEffect } from 'react';
 import { useSocket } from '../../context/SocketContext';
 import { queueService } from '../../services/queueService';
 
-const PublicDisplay = () => {
+interface QueueDisplay {
+  id: string;
+  name: string;
+  queueNumber: string;
+  status: string;
+  serviceType: string;
+  department: string;
+  nextTicket: string;
+  waitingCount: number;
+  avgWaitTime: number;
+  nowServing?: {
+    queueNumber: string;
+    patientName: string;
+    doctorName: string;
+    serviceStartTime: string;
+    estimatedDuration: number;
+  };
+  waitingPatients: Array<{
+    queueNumber: string;
+    patientName: string;
+    priority: string;
+    joinedAt: string;
+    estimatedWaitTime: number;
+  }>;
+  statistics: {
+    totalWaiting: number;
+    currentlyInProgress: number;
+    averageWaitTime: number;
+    lastUpdated: string;
+  };
+}
+
+const PublicDisplay: React.FC = () => {
   const { socket, connected } = useSocket();
-  const [queues, setQueues] = useState([]);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [queues, setQueues] = useState<QueueDisplay[]>([]);
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
 
   useEffect(() => {
     // Update time every second
@@ -19,10 +51,10 @@ const PublicDisplay = () => {
 
   useEffect(() => {
     // Fetch initial queue data
-    const fetchQueues = async () => {
+    const fetchQueues = async (): Promise<void> => {
       try {
         const data = await queueService.getQueues();
-        setQueues(data);
+        setQueues(data as unknown as QueueDisplay[]);
       } catch (error) {
         console.error('Failed to fetch queues:', error);
       }
@@ -32,7 +64,7 @@ const PublicDisplay = () => {
 
     // Listen for real-time updates
     if (socket) {
-      socket.on('queue-update', (updatedQueue) => {
+      socket.on('queue-update', (updatedQueue: QueueDisplay) => {
         setQueues(prev => 
           prev.map(queue => 
             queue.id === updatedQueue.id ? updatedQueue : queue
@@ -40,7 +72,7 @@ const PublicDisplay = () => {
         );
       });
 
-      socket.on('ticket-called', (data) => {
+      socket.on('ticket-called', (data: { queueNumber: string; patientName: string; message: string }) => {
         // Play sound or show notification when ticket is called
         console.log('Ticket called:', data);
       });
@@ -54,7 +86,7 @@ const PublicDisplay = () => {
     };
   }, [socket]);
 
-  const formatTime = (date) => {
+  const formatTime = (date: Date): string => {
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit',
@@ -62,7 +94,7 @@ const PublicDisplay = () => {
     });
   };
 
-  const formatDate = (date) => {
+  const formatDate = (date: Date): string => {
     return date.toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
@@ -135,7 +167,7 @@ const PublicDisplay = () => {
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                 <p className="text-sm font-medium text-green-800 mb-1">NOW SERVING</p>
                 <p className="text-3xl font-bold text-green-900">
-                  {queue.nowServing || '---'}
+                  {typeof queue.nowServing === 'object' && queue.nowServing?.queueNumber ? queue.nowServing.queueNumber : '---'}
                 </p>
               </div>
 

@@ -4,11 +4,33 @@ import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../hooks/useAuth';
 import { t } from '../../utils/i18n';
 
-const DoctorDashboard = () => {
+interface QuickAction {
+  label: string;
+  path: string;
+  icon: string;
+  description: string;
+}
+
+interface Stat {
+  label: string;
+  value: string;
+  change: string;
+  color: string;
+}
+
+interface Appointment {
+  id: number;
+  patient: string;
+  time: string;
+  status: 'completed' | 'in-progress' | 'waiting';
+  type: 'Follow-up' | 'Consultation' | 'New Patient';
+}
+
+const DoctorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const quickActions = [
+  const quickActions: QuickAction[] = [
     { 
       label: t('patientList'), 
       path: '/doctor/patients', 
@@ -35,14 +57,14 @@ const DoctorDashboard = () => {
     },
   ];
 
-  const stats = [
+  const stats: Stat[] = [
     { label: 'Patients Today', value: '24', change: '+3 from yesterday', color: 'text-green-600' },
     { label: 'In Queue', value: '8', change: '2 waiting > 15min', color: 'text-blue-600' },
     { label: 'Completed', value: '16', change: 'On track', color: 'text-purple-600' },
     { label: 'Avg Consult Time', value: '12 min', change: '-2 min', color: 'text-orange-600' },
   ];
 
-  const todaysAppointments = [
+  const todaysAppointments: Appointment[] = [
     { id: 1, patient: 'John Doe', time: '09:00 AM', status: 'completed', type: 'Follow-up' },
     { id: 2, patient: 'Jane Smith', time: '09:30 AM', status: 'completed', type: 'Consultation' },
     { id: 3, patient: 'Mike Johnson', time: '10:00 AM', status: 'in-progress', type: 'New Patient' },
@@ -50,7 +72,7 @@ const DoctorDashboard = () => {
     { id: 5, patient: 'Robert Brown', time: '11:00 AM', status: 'waiting', type: 'Consultation' },
   ];
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: Appointment['status']): string => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
       case 'in-progress': return 'bg-blue-100 text-blue-800';

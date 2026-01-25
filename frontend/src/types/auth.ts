@@ -4,7 +4,11 @@ export interface User {
   role: 'Patient' | 'Doctor' | 'Lab Technician' | 'Admin';
   firstName: string;
   lastName: string;
-  phone?: string;
+  phoneNumber: string;
+  username: string;
+  isActive: boolean;
+  createdAt?: string;
+  lastLogin?: string;
 }
 
 export interface LoginCredentials {
@@ -12,10 +16,32 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegistrationCredentials {
+  username: string;
+  email: string;
+  password: string;
+  role: 'Patient' | 'Doctor' | 'Lab Technician' | 'Admin';
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+}
+
 export interface AuthResponse {
-  user: User;
-  token: string;
-  expiresIn: string;
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+    token: string;
+    expiresIn: string;
+  };
+}
+
+export interface RegistrationResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+  };
 }
 
 export const UserRoles = {

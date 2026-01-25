@@ -81,9 +81,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     dispatch({ type: 'LOGIN_START' });
     try {
       const response = await authService.login(credentials);
-      authService.storeToken(response.token);
-      dispatch({ type: 'LOGIN_SUCCESS', payload: response.user });
-      return response.user;
+      authService.storeToken(response.data.token);
+      dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user });
+      return response.data.user;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
       dispatch({ type: 'LOGIN_FAILURE', payload: errorMessage });

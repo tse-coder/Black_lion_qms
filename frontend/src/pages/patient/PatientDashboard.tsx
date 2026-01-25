@@ -4,11 +4,25 @@ import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../hooks/useAuth';
 import { t } from '../../utils/i18n';
 
-const PatientDashboard = () => {
+interface QuickAction {
+  label: string;
+  path: string;
+  icon: string;
+  description: string;
+}
+
+interface Stat {
+  label: string;
+  value: string;
+  change: string;
+  color: string;
+}
+
+const PatientDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const quickActions = [
+  const quickActions: QuickAction[] = [
     { 
       label: t('queueStatus'), 
       path: '/patient/queue-status', 
@@ -35,7 +49,7 @@ const PatientDashboard = () => {
     },
   ];
 
-  const stats = [
+  const stats: Stat[] = [
     { label: 'Current Queue', value: 'A-23', change: '+2 positions', color: 'text-blue-600' },
     { label: 'Wait Time', value: '15 min', change: '-5 min', color: 'text-green-600' },
     { label: 'Next Appointment', value: 'Today, 2:30 PM', change: 'In 2 hours', color: 'text-purple-600' },

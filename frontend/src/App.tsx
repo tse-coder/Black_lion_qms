@@ -2,14 +2,25 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import PatientDashboard from './pages/patient/PatientDashboard';
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import PublicDisplay from './pages/public/PublicDisplay';
 import './assets/index.css';
+import type { ReactNode } from 'react';
+
+interface ProtectedRouteProps {
+  children: ReactNode;
+  requiredRole?: string;
+}
+
+interface PublicRouteProps {
+  children: ReactNode;
+}
 
 // Protected route component
-const ProtectedRoute = ({ children, requiredRole }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
   const { user, loading, isAuthenticated } = useAuth();
 
   if (loading) {
@@ -27,9 +38,9 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return <Navigate to="/login" />;
   }
 
-  if (requiredRole && user.role !== requiredRole) {
+  if (requiredRole && user?.role !== requiredRole) {
     // Redirect to appropriate dashboard based on user role
-    const rolePath = user.role.toLowerCase().replace(' ', '-');
+    const rolePath = user?.role?.toLowerCase().replace(' ', '-') || 'patient';
     return <Navigate to={`/${rolePath}/dashboard`} />;
   }
 
@@ -37,7 +48,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 };
 
 // Public route (redirect to dashboard if authenticated)
-const PublicRoute = ({ children }) => {
+const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const { user, loading, isAuthenticated } = useAuth();
 
   if (loading) {
@@ -52,7 +63,7 @@ const PublicRoute = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    const rolePath = user.role.toLowerCase().replace(' ', '-');
+    const rolePath = user?.role?.toLowerCase().replace(' ', '-') || 'patient';
     return <Navigate to={`/${rolePath}/dashboard`} />;
   }
 
@@ -71,6 +82,15 @@ function App() {
               element={
                 <PublicRoute>
                   <LoginPage />
+                </PublicRoute>
+              } 
+            />
+            
+            <Route 
+              path="/register" 
+              element={
+                <PublicRoute>
+                  <RegisterPage />
                 </PublicRoute>
               } 
             />

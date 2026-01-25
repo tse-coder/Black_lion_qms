@@ -4,11 +4,32 @@ import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../hooks/useAuth';
 import { t } from '../../utils/i18n';
 
-const AdminDashboard = () => {
+interface QuickAction {
+  label: string;
+  path: string;
+  icon: string;
+  description: string;
+}
+
+interface SystemStat {
+  label: string;
+  value: string;
+  change: string;
+  color: string;
+}
+
+interface ActivityItem {
+  action: string;
+  user: string;
+  time: string;
+  type: 'user' | 'system' | 'report';
+}
+
+const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const quickActions = [
+  const quickActions: QuickAction[] = [
     { 
       label: t('userManagement'), 
       path: '/admin/users', 
@@ -35,14 +56,14 @@ const AdminDashboard = () => {
     },
   ];
 
-  const systemStats = [
+  const systemStats: SystemStat[] = [
     { label: 'Total Users', value: '1,248', change: '+12 this week', color: 'text-blue-600' },
     { label: 'Active Queues', value: '8', change: 'All operational', color: 'text-green-600' },
     { label: 'Patients Today', value: '342', change: '+15% from avg', color: 'text-purple-600' },
     { label: 'System Health', value: '98%', change: 'All systems normal', color: 'text-green-600' },
   ];
 
-  const recentActivity = [
+  const recentActivity: ActivityItem[] = [
     { action: 'New user registered', user: 'Dr. Alice Chen', time: '5 minutes ago', type: 'user' },
     { action: 'Queue configuration updated', user: 'Admin', time: '1 hour ago', type: 'system' },
     { action: 'Report generated', user: 'Dr. John Smith', time: '2 hours ago', type: 'report' },
@@ -50,12 +71,12 @@ const AdminDashboard = () => {
     { action: 'User role changed', user: 'Admin', time: '6 hours ago', type: 'user' },
   ];
 
-  const getActivityIcon = (type) => {
+  const getActivityIcon = (type: ActivityItem['type']): string => {
     switch (type) {
       case 'user': return '👤';
       case 'system': return '⚙️';
       case 'report': return '📊';
-      default: return '📄';
+      default: return '📋';
     }
   };
 
