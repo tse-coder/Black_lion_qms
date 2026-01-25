@@ -4,3 +4,4 @@ node-modules
 .env
 .env.*
 **/node-modules
+docs/
