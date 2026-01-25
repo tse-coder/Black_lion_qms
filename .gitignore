@@ -1,7 +1,7 @@
 .windsurfrules
-node-modules
+node_modules
 *.log
 .env
 .env.*
-**/node-modules
+**/node_modules
 docs/
