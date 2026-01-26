@@ -44,7 +44,13 @@ const Patient = sequelize.define('Patient', {
   emergencyContactPhone: {
     type: DataTypes.STRING,
     validate: {
-      is: /^\+251[9][0-9]{8}$/,
+      isEitherEmptyOrValid(value) {
+        if (value && value !== '') {
+          if (!/^\+251[9][0-9]{8}$/.test(value)) {
+            throw new Error('Must be a valid Ethiopian phone number (+2519xxxxxxxx)');
+          }
+        }
+      },
     },
   },
   bloodType: {

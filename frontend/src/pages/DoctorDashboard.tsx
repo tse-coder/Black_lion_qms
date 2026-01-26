@@ -5,8 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSocket } from '@/contexts/SocketContext';
 import { queueApi, Queue, Priority } from '@/lib/api';
 import { PriorityBadge } from '@/components/queue';
 import { useToast } from '@/hooks/use-toast';
@@ -119,12 +127,15 @@ export default function DoctorDashboard() {
   const [isCallingNext, setIsCallingNext] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Queue | null>(null);
+  const [activeDept, setActiveDept] = useState<string>('');
+  const { socket } = useSocket();
+
 
   // Fetch active queue data
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await queueApi.getActive();
+      const response = await queueApi.getActive(activeDept);
       if (response.data.success) {
         setData({
           department: response.data.data.department,
@@ -133,6 +144,9 @@ export default function DoctorDashboard() {
           statistics: response.data.data.statistics,
           doctorId: response.data.data.doctorId,
         });
+        if (!activeDept) {
+           setActiveDept(response.data.data.department);
+        }
       }
     } catch (error) {
       // Use mock data if API fails
@@ -143,10 +157,20 @@ export default function DoctorDashboard() {
 
   useEffect(() => {
     fetchData();
-    // Poll every 30 seconds
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
-  }, [fetchData]);
+
+    if (socket) {
+      socket.on('queue:updated', (payload: any) => {
+        if (payload.department === activeDept || !activeDept) {
+          console.log('[SOCKET] Queue update received');
+          fetchData();
+        }
+      });
+
+      return () => {
+        socket.off('queue:updated');
+      };
+    }
+  }, [fetchData, socket, activeDept]);
 
   // Call next patient
   const handleCallNext = async () => {
@@ -227,20 +251,37 @@ export default function DoctorDashboard() {
       <div className="min-h-[calc(100vh-4rem)] py-6 px-4">
         <div className="container mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold">{t('doctorDashboard')}</h1>
-              <p className="text-muted-foreground">
-                {data.department} • Dr. {user?.firstName} {user?.lastName}
-              </p>
-            </div>
-            <Button variant="outline" onClick={fetchData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t('doctorDashboard')}</h1>
+          <p className="text-muted-foreground">
+            {t('welcomeBack')}, Dr. {user?.firstName} {user?.lastName}
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-end mr-4">
+             <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none mb-1">Active Department</span>
+             <Select value={activeDept} onValueChange={setActiveDept}>
+                <SelectTrigger className="w-[180px] h-9 bg-white border-primary/20 focus:ring-primary/20">
+                  <SelectValue placeholder="Select Dept" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Cardiology">Cardiology</SelectItem>
+                  <SelectItem value="Laboratory">Laboratory</SelectItem>
+                  <SelectItem value="Radiology">Radiology</SelectItem>
+                  <SelectItem value="Pharmacy">Pharmacy</SelectItem>
+                  <SelectItem value="Emergency">Emergency</SelectItem>
+                  <SelectItem value="General Consultation">General Medicine</SelectItem>
+                </SelectContent>
+             </Select>
           </div>
-
-          {/* Statistics Bar */}
+          <Button variant="outline" size="sm" onClick={() => fetchData()}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            {t('refresh')}
+          </Button>
+        </div>
+      </div>     {/* Statistics Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <Card>
               <CardContent className="pt-6">

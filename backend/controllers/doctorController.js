@@ -6,11 +6,10 @@ import { Sequelize } from 'sequelize';
 const getActiveQueues = async (req, res) => {
   try {
     const doctorId = req.user.id;
-    
-    // Get doctor's department (assuming doctor has a department field or we get it from their profile)
-    // For now, we'll use a default or get it from the user's assigned queues
-    const doctorDepartment = req.query.department || await getDoctorDepartment(doctorId);
-    
+
+    // For now, we'll prioritized: 1. Query Param, 2. Derivation, 3. Default
+    const doctorDepartment = req.query.department || await getDoctorDepartment(doctorId) || 'General Consultation';
+
     if (!doctorDepartment) {
       return res.status(400).json({
         error: 'Department Not Found',
@@ -32,7 +31,7 @@ const getActiveQueues = async (req, res) => {
             {
               model: db.User,
               as: 'user',
-              attributes: ['firstName', 'lastName', 'phoneNumber', 'dateOfBirth'],
+              attributes: ['firstName', 'lastName', 'phoneNumber'],
             },
           ],
         },
@@ -97,7 +96,7 @@ const callNextPatient = async (req, res) => {
   try {
     const doctorId = req.user.id;
     const { department } = req.body;
-    
+
     if (!department) {
       return res.status(400).json({
         error: 'Validation Error',
@@ -189,6 +188,22 @@ const callNextPatient = async (req, res) => {
       ],
     });
 
+    // Emit socket events
+    const io = req.app.get('io');
+    if (io) {
+      console.log(`[SOCKET] Emitting queue update for ${department}`);
+      io.emit('queue:updated', { department });
+      io.emit('display:updated', { department });
+      // Targeted event for the specific patient
+      io.to(`patient:${calledPatient.patientId}`).emit('patient:called', {
+        queueNumber: calledPatient.queueNumber,
+        department,
+        doctorName: `Dr. ${req.user.firstName} ${req.user.lastName}`
+      });
+    } else {
+      console.warn('[SOCKET] Socket io instance not found in req.app during callNextPatient');
+    }
+
     res.status(200).json({
       success: true,
       message: 'Next patient called successfully',
@@ -246,7 +261,7 @@ const completePatient = async (req, res) => {
     // Calculate actual service time
     const serviceEndTime = new Date();
     let actualServiceTime = null;
-    
+
     if (currentPatient.serviceStartTime) {
       actualServiceTime = Math.round((serviceEndTime - currentPatient.serviceStartTime) / 60000); // minutes
     }
@@ -267,6 +282,16 @@ const completePatient = async (req, res) => {
     } catch (smsError) {
       console.error('Failed to send completion SMS:', smsError);
       // Continue with the process even if SMS fails
+    }
+
+    // Emit socket events
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('queue:updated', { department: updatedQueue.department });
+      io.emit('display:updated', { department: updatedQueue.department });
+      io.to(`patient:${updatedQueue.patientId}`).emit('patient:completed', {
+        queueNumber: updatedQueue.queueNumber
+      });
     }
 
     res.status(200).json({
@@ -305,7 +330,7 @@ const getQueueStatistics = async (req, res) => {
     // Calculate date range
     let startDate, endDate;
     const today = new Date();
-    
+
     switch (dateRange) {
       case 'today':
         startDate = new Date(today.setHours(0, 0, 0, 0));
@@ -377,14 +402,23 @@ const getQueueStatistics = async (req, res) => {
 // Helper function to get doctor's department
 const getDoctorDepartment = async (doctorId) => {
   try {
-    // This could be stored in the User model or derived from recent queues
-    const recentQueue = await db.Queue.findOne({
+    //derivation logic
+    let recentQueue = await db.Queue.findOne({
       where: { doctorId: doctorId },
       order: [['createdAt', 'DESC']],
       attributes: ['department'],
     });
-    
-    return recentQueue ? recentQueue.department : null;
+
+    if (recentQueue) return recentQueue.department;
+
+    // Fallback for demo: use the department with the most waiting patients
+    const waitingQueue = await db.Queue.findOne({
+      where: { status: 'Waiting' },
+      order: [['createdAt', 'DESC']],
+      attributes: ['department'],
+    });
+
+    return waitingQueue ? waitingQueue.department : 'General Consultation';
   } catch (error) {
     console.error('Error getting doctor department:', error);
     return null;
@@ -410,7 +444,7 @@ const calculateAverageWaitTime = async (department) => {
       ],
       raw: true,
     });
-    
+
     return result[0]?.avgWaitTime ? Math.round(result[0].avgWaitTime) : 0;
   } catch (error) {
     console.error('Error calculating average wait time:', error);

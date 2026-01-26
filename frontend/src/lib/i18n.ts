@@ -23,6 +23,7 @@ export const translations = {
     logout: 'Logout',
     login: 'Login',
     register: 'Register',
+    refresh: 'Refresh',
     
     // Navigation
     home: 'Home',
@@ -192,6 +193,7 @@ export const translations = {
     logout: 'ውጣ',
     login: 'ግባ',
     register: 'ተመዝገብ',
+    refresh: 'አድስ',
     
     // Navigation
     home: 'መነሻ',

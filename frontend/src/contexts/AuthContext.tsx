@@ -59,7 +59,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
+      console.log('[AUTH] Starting login process');
+      console.log('[AUTH] Login attempt:', { email, password: '[HIDDEN]' });
+      
+      // Real API call using authApi.login
       const response = await authApi.login(email, password);
+      console.log('[AUTH] API Response:', response.data);
       
       if (response.data.success) {
         const { user: userData, token: authToken } = response.data.data;
@@ -69,15 +74,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.setItem('token', authToken);
         localStorage.setItem('user', JSON.stringify(userData));
         
+        console.log('[AUTH] User data stored in localStorage');
+        
         toast({
           title: 'Login Successful',
           description: `Welcome back, ${userData.firstName}!`,
         });
         
+        console.log('[AUTH] Login completed successfully');
         return true;
       }
       return false;
     } catch (error: any) {
+      console.log('[AUTH] Login failed:', error);
+      console.log('[AUTH] Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
       const message = error.response?.data?.message || 'Invalid email or password';
       toast({
         title: 'Login Failed',
@@ -87,6 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return false;
     } finally {
       setIsLoading(false);
+      console.log('[AUTH] Login process finished');
     }
   }, [toast]);
 

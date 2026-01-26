@@ -10,6 +10,7 @@ import queueRoutes from './queues.js';
 import notificationRoutes from './notifications.js';
 import doctorRoutes from './doctor.js';
 import displayRoutes from './display.js';
+import appointmentRoutes from './appointment.js';
 
 // Health check for API
 router.get('/health', (req, res) => {
@@ -28,5 +29,6 @@ router.use('/queues', queueRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/api', doctorRoutes);
 router.use('/api', displayRoutes);
+router.use('/appointments', appointmentRoutes);
 
 export default router;

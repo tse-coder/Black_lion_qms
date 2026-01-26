@@ -234,7 +234,7 @@ export const queueApi = {
     api.put<ApiResponse<{ previousQueue?: Queue; nextQueue: Queue }>>(`/queues/${queueId}/next`),
   
   // Doctor-specific endpoints
-  getActive: () =>
+  getActive: (department?: string) =>
     api.get<ApiResponse<{
       department: string;
       currentPatient?: Queue;
@@ -246,7 +246,7 @@ export const queueApi = {
         averageWaitTime: number;
       };
       doctorId: string;
-    }>>('/api/queue/active'),
+    }>>('/api/queue/active', { params: { department } }),
   
   doctorCallNext: (department: string) =>
     api.patch<ApiResponse<{
@@ -303,6 +303,21 @@ export const notificationApi = {
         patientId?: string;
       }>;
     }>>('/notifications/history'),
+};
+
+// Appointment API
+export const appointmentApi = {
+  create: (data: {
+    fullName: string;
+    email?: string;
+    phoneNumber: string;
+    department: string;
+    appointmentDate: string;
+    appointmentTime: string;
+    notes?: string;
+  }) => api.post<ApiResponse<{ appointment: any; cardNumber: string }>>('/appointments', data),
+  
+  getAll: () => api.get<ApiResponse<{ appointments: any[] }>>('/appointments'),
 };
 
 // Health check

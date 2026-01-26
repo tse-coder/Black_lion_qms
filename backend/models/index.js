@@ -2,6 +2,7 @@ import sequelize from '../config/database.js';
 import User from './User.js';
 import Patient from './Patient.js';
 import Queue from './Queue.js';
+import Appointment from './Appointment.js';
 
 // Define associations
 User.hasOne(Patient, {
@@ -29,6 +30,16 @@ Queue.belongsTo(Patient, {
   as: 'patient',
 });
 
+Patient.hasMany(Appointment, {
+  foreignKey: 'patientId',
+  as: 'appointments',
+});
+
+Appointment.belongsTo(Patient, {
+  foreignKey: 'patientId',
+  as: 'patient',
+});
+
 Queue.belongsTo(User, {
   foreignKey: 'doctorId',
   as: 'doctor',
@@ -40,6 +51,7 @@ const db = {
   User,
   Patient,
   Queue,
+  Appointment,
 };
 
 export default db;

@@ -57,12 +57,8 @@ export function Header() {
           <img 
             src="/logo.png" 
             alt="Black Lion Hospital QMS" 
-            className="h-10 w-10 object-contain rounded-lg"
+            className="h-14 object-contain rounded-lg"
           />
-          <div className="hidden sm:block">
-            <h1 className="text-lg font-bold text-foreground">{t('appName')}</h1>
-            <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
-          </div>
         </Link>
 
         {/* Navigation */}

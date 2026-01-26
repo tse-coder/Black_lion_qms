@@ -8,23 +8,42 @@ const generateQueueNumber = async (department, serviceType) => {
   try {
     // Get department code (first 4 letters, uppercase)
     const deptCode = department.substring(0, 4).toUpperCase();
-    
-    // Count queues for this department today
+
+    // Find the latest queue number for this department today to avoid collisions
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const queueCount = await db.Queue.count({
+
+    const lastQueue = await db.Queue.findOne({
       where: {
         department: department,
-        createdAt: {
-          [Sequelize.Op.gte]: today,
-        },
+        createdAt: { [Sequelize.Op.gte]: today },
+        queueNumber: { [Sequelize.Op.like]: `${deptCode}-%` }
       },
+      order: [['createdAt', 'DESC']],
     });
 
-    // Generate queue number with padding (e.g., CARD-001)
-    const queueNumber = `${deptCode}-${String(queueCount + 1).padStart(3, '0')}`;
-    
+    let nextNum = 1;
+    if (lastQueue) {
+      const parts = lastQueue.queueNumber.split('-');
+      const lastNum = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(lastNum)) {
+        nextNum = lastNum + 1;
+      }
+    }
+
+    // Robust unique check loop
+    let isUnique = false;
+    let queueNumber;
+    while (!isUnique) {
+      queueNumber = `${deptCode}-${String(nextNum).padStart(3, '0')}`;
+      const existing = await db.Queue.findOne({ where: { queueNumber } });
+      if (!existing) {
+        isUnique = true;
+      } else {
+        nextNum++;
+      }
+    }
+
     return queueNumber;
   } catch (error) {
     console.error('Error generating queue number:', error);
@@ -47,7 +66,7 @@ const estimateWaitTime = async (department, serviceType) => {
     // Average service time (mock calculation - in real implementation, this would be based on historical data)
     const averageServiceTime = 15; // minutes per patient
     const estimatedWaitTime = activeQueues * averageServiceTime;
-    
+
     return estimatedWaitTime;
   } catch (error) {
     console.error('Error estimating wait time:', error);
@@ -69,20 +88,43 @@ const requestQueueNumber = async (req, res) => {
     }
 
     // Step 1: Validate patient card via EMR
-    const emrValidation = await emrService.validatePatientCard(cardNumber);
-    
-    if (!emrValidation.success) {
-      return res.status(404).json({
-        error: 'EMR Validation Failed',
-        message: emrValidation.message || 'Patient card validation failed',
-      });
-    }
+    const formattedCardNumber = cardNumber.trim().toUpperCase();
+    let patientData;
+    let emrValidation = await emrService.validatePatientCard(formattedCardNumber);
 
-    const patientData = emrValidation.data;
+    if (!emrValidation.success) {
+      console.log(`[DEBUG] EMR validation failed for ${formattedCardNumber}. Checking Appointments table...`);
+      // Fallback: Check if there's an appointment with this card number
+      const appointment = await db.Appointment.findOne({
+        where: { cardNumber: formattedCardNumber }
+      });
+
+      if (appointment) {
+        console.log(`[DEBUG] Found appointment for ${formattedCardNumber}: ${appointment.fullName}`);
+        patientData = {
+          cardNumber: appointment.cardNumber,
+          firstName: appointment.fullName.split(' ')[0],
+          lastName: appointment.fullName.split(' ').slice(1).join(' ') || '',
+          phoneNumber: appointment.phoneNumber,
+          medicalRecordNumber: `MRN-APT-${appointment.id.slice(0, 8)}`,
+          dateOfBirth: '1900-01-01',
+          gender: 'Other',
+        };
+      } else {
+        console.log(`[DEBUG] No appointment found for ${formattedCardNumber}`);
+        return res.status(404).json({
+          error: 'EMR Validation Failed',
+          message: emrValidation.message || 'Patient card validation failed',
+        });
+      }
+    } else {
+      console.log(`[DEBUG] EMR validation successful for ${formattedCardNumber}`);
+      patientData = emrValidation.data;
+    }
 
     // Step 2: Find or create patient in local database
     let patient = await db.Patient.findOne({
-      where: { cardNumber: cardNumber },
+      where: { cardNumber: formattedCardNumber },
       include: [
         {
           model: db.User,
@@ -179,7 +221,7 @@ const requestQueueNumber = async (req, res) => {
 
     // Step 6: Send SMS notification to patient
     const smsMessage = `Dear ${patient.user.firstName}, your queue number is ${queueNumber} for ${serviceType} at ${department}. Current wait time: approximately ${estimatedWaitTime} minutes. Please be ready.`;
-    
+
     try {
       await notificationService.sendSMS(patient.user.phoneNumber, smsMessage);
     } catch (smsError) {
@@ -203,6 +245,13 @@ const requestQueueNumber = async (req, res) => {
         },
       ],
     });
+
+    // Step 8: Emit socket events for real-time updates
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('queue:updated', { department });
+      io.emit('display:updated', { department });
+    }
 
     res.status(201).json({
       success: true,

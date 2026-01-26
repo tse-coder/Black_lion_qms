@@ -1,4 +1,6 @@
 import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -7,6 +9,23 @@ import 'dotenv/config';
 import db from './models/index.js';
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  },
+});
+
+app.set('io', io);
+
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+  socket.on('join', (room) => {
+    socket.join(room);
+  });
+});
+
 
 // Security middleware
 app.use(helmet());
@@ -59,12 +78,12 @@ const startServer = async () => {
   try {
     await db.sequelize.authenticate();
     console.log('Database connection established successfully.');
-    
+
     // Sync database (create tables if they don't exist)
     await db.sequelize.sync({ alter: true });
     console.log('Database synchronized successfully.');
-    
-    app.listen(PORT, () => {
+
+    httpServer.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
       console.log(`Health check: http://localhost:${PORT}/health`);
     });

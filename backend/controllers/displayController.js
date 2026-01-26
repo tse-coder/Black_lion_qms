@@ -4,17 +4,22 @@ import { Sequelize } from 'sequelize';
 // Get currently serving numbers for all departments (Public Display)
 const getQueueDisplay = async (req, res) => {
   try {
-    // Get all unique departments
-    const departments = await db.Queue.findAll({
-      attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('department')), 'department']],
-      raw: true,
-    });
+    // List of predefined departments for consistent high-end UI
+    const PREDEFINED_DEPARTMENTS = [
+      'Cardiology',
+      'Laboratory',
+      'Radiology',
+      'Pharmacy',
+      'Emergency',
+      'General Medicine',
+      'Orthopedics',
+      'Pediatrics',
+    ];
 
     const departmentQueues = [];
 
     // For each department, get current serving and waiting patients
-    for (const dept of departments) {
-      const departmentName = dept.department;
+    for (const departmentName of PREDEFINED_DEPARTMENTS) {
 
       // Get currently serving patient (InProgress)
       const currentServing = await db.Queue.findOne({
@@ -352,7 +357,7 @@ const calculateAverageWaitTime = async (department) => {
       ],
       raw: true,
     });
-    
+
     return result[0]?.avgWaitTime ? Math.round(result[0].avgWaitTime) : 15; // Default 15 minutes
   } catch (error) {
     console.error('Error calculating average wait time:', error);
@@ -382,7 +387,7 @@ const getAverageServiceTime = async (department, serviceType) => {
       ],
       raw: true,
     });
-    
+
     return result[0]?.avgServiceTime ? Math.round(result[0].avgServiceTime) : 15;
   } catch (error) {
     console.error('Error getting average service time:', error);

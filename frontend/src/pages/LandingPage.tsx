@@ -15,7 +15,8 @@ import {
   Users, 
   Clock,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  CalendarDays
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -80,7 +81,7 @@ export default function LandingPage() {
               <img 
                 src="/logo.png" 
                 alt="Black Lion Hospital QMS" 
-                className="w-24 h-24 object-contain rounded-lg shadow-lg"
+                className="h-44 object-contain rounded-lg shadow-lg"
               />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-fade-in">
@@ -113,12 +114,17 @@ export default function LandingPage() {
               </div>
             </form>
 
-            {/* Get Ticket CTA */}
-            <div className="mt-8">
-              <Button size="lg" variant="outline" asChild className="bg-white/10 hover:bg-white/20 border-white/30">
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" variant="secondary" asChild className="h-14 px-8 font-bold text-lg shadow-xl shadow-black/10">
                 <Link to="/check-in">
-                  <UserPlus className="h-5 w-5 mr-2" />
+                  <UserPlus className="h-6 w-6 mr-2" />
                   {t('getNewTicket')}
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild className="h-14 px-8 font-bold text-lg bg-white/10 hover:bg-white/20 border-white/30 text-white">
+                <Link to="/appointment">
+                  <CalendarDays className="h-6 w-6 mr-2" />
+                  Book Appointment
                 </Link>
               </Button>
             </div>
@@ -200,13 +206,23 @@ export default function LandingPage() {
                 </CardHeader>
               </Card>
 
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer border-primary/20 bg-primary/5" onClick={() => navigate('/appointment')}>
+                <CardHeader className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/20">
+                    <CalendarDays className="h-8 w-8 text-white" />
+                  </div>
+                  <CardTitle className="text-primary">Book Appointment</CardTitle>
+                  <CardDescription>New patient registration</CardDescription>
+                </CardHeader>
+              </Card>
+
               <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/login')}>
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Activity className="h-8 w-8 text-primary" />
+                  <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+                    <Activity className="h-8 w-8 text-slate-600" />
                   </div>
-                  <CardTitle>{t('login')}</CardTitle>
-                  <CardDescription>Staff & Patient Portal</CardDescription>
+                  <CardTitle>Staff Portal</CardTitle>
+                  <CardDescription>Doctor & Tech Access</CardDescription>
                 </CardHeader>
               </Card>
             </div>
