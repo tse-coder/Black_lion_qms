@@ -12,7 +12,7 @@ export default function UnauthorizedPage() {
   const { user } = useAuth();
 
   return (
-    <MainLayout>
+    <MainLayout showHeader={false} title="Unauthorized Access">
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-8 px-4">
         <Card className="w-full max-w-md text-center">
           <CardHeader>

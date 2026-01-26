@@ -72,7 +72,7 @@ export default function LandingPage() {
   };
 
   return (
-    <MainLayout>
+    <MainLayout title="Welcome">
       <div className="min-h-[calc(100vh-4rem)]">
         {/* Hero Section */}
         <section className="relative bg-gradient-to-br from-primary to-primary/80 text-primary-foreground py-20 px-4">

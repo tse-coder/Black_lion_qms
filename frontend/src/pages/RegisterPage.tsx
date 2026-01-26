@@ -101,7 +101,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <MainLayout>
+    <MainLayout showHeader={false} title="Register New Account">
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-8 px-4 bg-gradient-to-br from-background to-secondary/20">
         <div className="w-full max-w-2xl">
           <Button variant="ghost" asChild className="mb-4 hover:bg-white/50 backdrop-blur-sm transition-all duration-300">

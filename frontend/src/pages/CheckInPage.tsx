@@ -98,7 +98,7 @@ export default function CheckInPage() {
   };
 
   return (
-    <MainLayout>
+    <MainLayout title="Patient Check-In">
       <div className="min-h-[calc(100vh-4rem)] py-12 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto max-w-md">
           {/* Back Button */}

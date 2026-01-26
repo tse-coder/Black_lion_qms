@@ -159,7 +159,7 @@ export default function AppointmentPage() {
   }
 
   return (
-    <MainLayout>
+    <MainLayout title="Book Appointment">
       <div className="min-h-[calc(100vh-4rem)] bg-[#f8fafc] py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-6 mb-12">

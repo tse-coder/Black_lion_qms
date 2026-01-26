@@ -247,7 +247,7 @@ export default function DoctorDashboard() {
   });
 
   return (
-    <MainLayout>
+    <MainLayout title="Doctor Dashboard">
       <div className="min-h-[calc(100vh-4rem)] py-6 px-4">
         <div className="container mx-auto">
           {/* Header */}

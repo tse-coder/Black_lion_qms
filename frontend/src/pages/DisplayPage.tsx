@@ -24,6 +24,11 @@ export default function DisplayPage() {
   const [highlightedQueue, setHighlightedQueue] = useState<string | null>(null);
   const previousServingRef = useRef<Map<string, string>>(new Map());
 
+  // Set document title
+  useEffect(() => {
+    document.title = 'Public Display Board | Black Lion DQMS';
+  }, []);
+
   // Initialize meSpeak.js for industrial consistency
   useEffect(() => {
     try {

@@ -104,7 +104,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <MainLayout>
+    <MainLayout title="Admin Dashboard">
       <div className="min-h-[calc(100vh-4rem)] py-6 px-4">
         <div className="container mx-auto">
           {/* Header */}
