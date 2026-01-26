@@ -1,27 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { DepartmentDisplay } from '@/lib/api';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { DepartmentDisplay, queueApi } from '@/lib/api';
 import { useSocket } from '@/contexts/SocketContext';
-import { PriorityBadge } from '@/components/queue';
+import meSpeak from 'mespeak';
 import { 
-  Clock, 
-  RefreshCw, 
+  Clock,
   Volume2, 
   VolumeX, 
   Maximize, 
-  Minimize, 
-  Megaphone,
-  TrendingUp,
+  Minimize,
   Activity,
   Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
 export default function DisplayPage() {
-  const { t } = useLanguage();
   const { socket } = useSocket();
   const [departments, setDepartments] = useState<DepartmentDisplay[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -31,17 +24,30 @@ export default function DisplayPage() {
   const [highlightedQueue, setHighlightedQueue] = useState<string | null>(null);
   const previousServingRef = useRef<Map<string, string>>(new Map());
 
-  // Voice Announcement Function
+  // Initialize meSpeak.js for industrial consistency
+  useEffect(() => {
+    try {
+      meSpeak.loadConfig('/mespeak/config.json');
+      meSpeak.loadVoice('/mespeak/en-us.json');
+      console.log('[TTS] meSpeak engine ready');
+    } catch (error) {
+      console.error('[TTS] meSpeak initialization failed', error);
+    }
+  }, []);
+
+  // Voice Announcement Function (meSpeak)
   const announcePatient = useCallback((queueNumber: string, department: string) => {
-    if (!soundEnabled) return;
+    if (!soundEnabled || !meSpeak.isVoiceLoaded()) return;
     
-    // Use Web Speech API
-    const message = new SpeechSynthesisUtterance(
-      `Queue number ${queueNumber.split('').join(' ')}, please proceed to ${department}`
-    );
-    message.rate = 0.9;
-    message.pitch = 1;
-    window.speechSynthesis.speak(message);
+    // Industrial drone-style announcement
+    const text = `Queue number ${queueNumber.split('').join(' ')}, please proceed to ${department}`;
+    
+    meSpeak.speak(text, {
+      speed: 155, // Slightly slower for better clarity
+      pitch: 65,  // Higher pitch for female voice
+      variant: 'f2', // Specifically select a female variant
+      wordgap: 1
+    });
   }, [soundEnabled]);
 
   const fetchDisplayData = useCallback(async () => {
@@ -52,7 +58,7 @@ export default function DisplayPage() {
         const newDepartments = response.data.data.departments;
         
         // Check for changes and trigger voice/highlight
-        newDepartments.forEach((dept) => {
+        newDepartments.forEach((dept: DepartmentDisplay) => {
           const currentServing = dept.currentlyServing?.queueNumber;
           const prevServing = previousServingRef.current.get(dept.department);
           
@@ -110,174 +116,149 @@ export default function DisplayPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] text-[#0f172a] overflow-hidden flex flex-col font-sans">
-      {/* Premium Header - Light Ticker Style */}
-      <header className="h-20 bg-white/80 backdrop-blur-xl border-b border-gray-200 flex items-center justify-between px-8 relative z-20 shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="p-2 bg-gray-50 rounded-xl shadow-sm border border-gray-100">
-            <img src="/logo.png" alt="Black Lion" className="h-10 object-contain" />
+    <div className="min-h-screen bg-[#f8fafc] text-[#1e293b] flex flex-col font-sans selection:bg-primary/10">
+      {/* Professional Hospital Header */}
+      <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 relative z-20 shadow-sm shrink-0">
+        <div className="flex items-center gap-4">
+          <div className="bg-white p-1 rounded-sm border border-gray-100 shadow-sm">
+            <img src="/logo.png" alt="Black Lion" className="h-6 object-contain" />
           </div>
-          <div className="h-10 w-[1px] bg-gray-200 mx-2" />
+          <div className="h-5 w-[1px] bg-gray-200 mx-1" />
           <div>
-            <h1 className="text-xl font-black tracking-tighter uppercase italic bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Black Lion Hospital <span className="text-[#1e293b] italic">Live Queue Display</span>
+            <h1 className="text-base font-black tracking-tighter uppercase italic text-[#0f172a] flex items-center gap-2">
+              Black Lion <span className="text-primary">Medical Queue Status</span>
             </h1>
-            <div className="flex items-center gap-2 text-[10px] text-primary font-bold uppercase tracking-[0.2em]">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              Real-time System Active
-            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-8">
-          <div className="text-right">
-            <p className="text-sm font-mono text-gray-500">{format(lastUpdated, 'EEEE, MMMM do')}</p>
-            <p className="text-2xl font-black font-mono tracking-widest text-[#1e293b]">
+        <div className="flex items-center gap-6">
+          <div className="text-right border-l border-gray-100 pl-6">
+            <p className="text-[14px] font-black font-mono tracking-tighter text-[#0f172a] leading-none">
               {format(lastUpdated, 'HH:mm:ss')}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="rounded-xl border-gray-200 bg-white hover:bg-gray-50 text-[#1e293b]"
+              className="h-7 w-7 rounded-none hover:bg-gray-50 text-gray-400 hover:text-primary transition-colors"
               onClick={() => setSoundEnabled(!soundEnabled)}
             >
-              {soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="rounded-xl border-gray-200 bg-white hover:bg-gray-50 text-[#1e293b]"
+              className="h-7 w-7 rounded-none hover:bg-gray-50 text-gray-400 hover:text-primary transition-colors"
               onClick={toggleFullscreen}
             >
-              {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+              {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Main Grid - Filled Side to Side */}
-      <main className="flex-1 p-6 relative z-10 overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-full auto-rows-fr">
-          {departments.map((dept) => (
-            <Card 
+      {/* Main Grid - Hospital Industrial Style */}
+      <main className="flex-1 p-[1px] relative z-10 bg-gray-300 overflow-y-auto lg:overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[1px] h-full">
+          {departments.map((dept: DepartmentDisplay) => (
+            <div 
               key={dept.department} 
-              className={`bg-white border border-gray-200 rounded-3xl overflow-hidden flex flex-col shadow-md transition-all duration-700 ${
+              className={`bg-white overflow-hidden flex flex-col transition-all duration-500 relative min-h-[400px] lg:min-h-0 ${
                 highlightedQueue === dept.currentlyServing?.queueNumber 
-                ? 'ring-4 ring-primary/20 border-primary scale-[1.02] z-30 shadow-xl' 
-                : ''
+                ? 'z-30 ring-inset ring-4 ring-primary shadow-2xl' 
+                : 'shadow-sm'
               }`}
             >
               {/* Dept Header */}
-              <div className="p-5 flex items-center justify-between border-b border-gray-100 bg-gray-50/50">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                  </div>
-                  <h3 className="font-black text-lg tracking-tight uppercase truncate max-w-[150px] text-[#1e293b]">
-                    {dept.department}
-                  </h3>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Active</span>
-                  <div className="flex items-center gap-1">
-                    <Activity className="h-3 w-3 text-emerald-500" />
-                    <span className="text-xs font-mono text-emerald-500 font-bold">LIVE</span>
-                  </div>
-                </div>
+              <div className={`px-4 py-3 flex items-center justify-between border-b border-gray-100 ${
+                 highlightedQueue === dept.currentlyServing?.queueNumber ? 'bg-primary text-white font-black' : 'bg-gray-50 text-[#334155]'
+              }`}>
+                <h3 className="font-black text-sm md:text-base tracking-widest uppercase truncate">
+                  {dept.department}
+                </h3>
+                <Activity className={`h-3 w-3 opacity-60 ${highlightedQueue === dept.currentlyServing?.queueNumber ? 'animate-pulse' : ''}`} />
               </div>
 
-              {/* Now Serving - Premium Callout */}
-              <div className="p-6 flex-1 flex flex-col justify-center items-center relative overflow-hidden bg-white">
-                {highlightedQueue === dept.currentlyServing?.queueNumber && (
-                   <div className="absolute inset-0 bg-primary/5 animate-pulse" />
-                )}
-                
-                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-[0.3em] mb-4">
-                  NOW SERVING
-                </p>
-                
+              {/* Now Serving - One Line Compact Focus */}
+              <div className={`px-4 py-4 border-b border-gray-100 transition-colors ${
+                highlightedQueue === dept.currentlyServing?.queueNumber ? 'bg-primary/5' : 'bg-white'
+              }`}>
                 {dept.currentlyServing ? (
-                  <div className="text-center group">
-                    <div className={`text-7xl font-black transition-all duration-500 ${
-                      highlightedQueue === dept.currentlyServing.queueNumber 
-                      ? 'text-primary scale-110 drop-shadow-sm' 
-                      : 'text-[#1e293b]'
-                    }`}>
-                      {dept.currentlyServing.queueNumber}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Current</p>
+                      <p className="text-3xl font-black text-[#0f172a] tracking-tighter leading-none mt-1">
+                        {dept.currentlyServing.queueNumber}
+                      </p>
                     </div>
-                    <div className="mt-4 space-y-1">
-                      <p className="text-lg font-bold text-[#334155] truncate max-w-[250px]">
+                    <div className="text-right flex-1 ml-4">
+                      <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1 truncate">
                         {dept.currentlyServing.patientName}
                       </p>
-                      <div className="flex items-center justify-center gap-2">
-                         <Megaphone className="h-3 w-3 text-primary animate-bounce" />
-                         <p className="text-xs text-primary font-bold uppercase tracking-widest">
-                           {dept.currentlyServing.doctorName || 'Wait for Call'}
-                         </p>
-                      </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center opacity-10">
-                    <Clock className="h-12 w-12 mx-auto mb-2" />
-                    <p className="text-xs font-black uppercase tracking-widest">No Active Patient</p>
+                  <div className="flex items-center justify-between opacity-20">
+                     <p className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase italic">Standby</p>
+                     <Clock className="h-5 w-5 text-gray-400" />
                   </div>
                 )}
               </div>
 
-              {/* Waiting List - Stock Refresh Style */}
-              <div className="bg-gray-50/80 p-5 mt-auto border-t border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-3 w-3 text-gray-400" />
-                    <span className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">In Queue</span>
-                  </div>
-                  <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[10px] font-bold">
-                    {dept.statistics.totalWaiting} TOTAL
-                  </Badge>
+              {/* Waiting List - Maximized Height */}
+              <div className="flex-1 flex flex-col bg-gray-50/30 min-h-0">
+                <div className="px-4 py-2 flex items-center justify-between bg-gray-100/30 border-b border-gray-100">
+                  <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Waiting List</span>
+                  <span className="text-[10px] text-primary font-black uppercase tracking-widest">
+                    {dept.statistics.totalWaiting} Patients
+                  </span>
                 </div>
                 
-                <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-hide">
+                <div className="flex-1 overflow-y-auto scrollbar-hide bg-white/50">
                   {dept.waitingPatients.length > 0 ? (
-                    dept.waitingPatients.map((patient) => (
+                    dept.waitingPatients.map((patient: any) => (
                       <div 
                         key={patient.queueNumber}
-                        className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-3 hover:bg-gray-50 transition-colors cursor-pointer group shadow-sm"
+                        className="group flex items-center justify-between border-b border-gray-50 px-4 py-3 hover:bg-gray-50 transition-colors"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono text-sm font-black text-[#475569] group-hover:text-primary transition-colors">
+                        <div className="flex items-center gap-4">
+                          <span className="text-xl font-black text-[#334155] group-hover:text-primary transition-colors">
                             {patient.queueNumber}
                           </span>
-                          <div className="h-3 w-[1px] bg-gray-200" />
-                          <span className="text-xs text-gray-500 truncate max-w-[100px]">
+                          <span className="text-xs font-bold text-[#94a3b8] uppercase truncate max-w-[150px]">
                             {patient.patientName}
                           </span>
                         </div>
-                        <PriorityBadge priority={patient.priority} />
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-sm border ${
+                          patient.priority === 'Urgent' ? 'bg-red-50 text-red-500 border-red-100' :
+                          patient.priority === 'High' ? 'bg-orange-50 text-orange-500 border-orange-100' :
+                          'bg-blue-50 text-primary border-blue-100'
+                        }`}>
+                          {patient.priority.toUpperCase()}
+                        </span>
                       </div>
                     ))
                   ) : (
-                    <div className="h-20 flex items-center justify-center border border-dashed border-gray-200 rounded-xl">
-                      <p className="text-[10px] text-gray-300 uppercase font-bold">Queue Empty</p>
+                    <div className="flex-1 flex items-center justify-center py-6 opacity-20">
+                      <p className="text-[10px] uppercase font-black tracking-widest italic text-gray-400">Section Clear</p>
                     </div>
                   )}
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       </main>
 
-      {/* Modern Ticker Footer */}
-      <footer className="h-12 bg-primary flex items-center overflow-hidden whitespace-nowrap px-4 border-t border-white/10">
-        <div className="flex items-center gap-4 bg-black/10 px-4 py-1 rounded-full mr-8">
-          <Activity className="h-4 w-4 animate-spin-slow text-white" />
-          <span className="text-xs font-black tracking-widest uppercase text-white">System Bulletin</span>
+      {/* Ticker Footer */}
+      <footer className="h-10 bg-primary flex items-center overflow-hidden whitespace-nowrap border-t border-white/10 relative z-20 shrink-0">
+        <div className="flex items-center gap-3 bg-black/40 h-full px-5 relative z-10 border-r border-white/10">
+          <Activity className="h-3.5 w-3.5 animate-spin-slow text-white" />
+          <span className="text-[10px] font-black tracking-[0.2em] uppercase text-white">Bulletin</span>
         </div>
         <div className="flex animate-marquee items-center gap-12 text-sm font-bold uppercase tracking-widest text-white">
-          {departments.map((dept) => (
+          {departments.map((dept: DepartmentDisplay) => (
             <div key={dept.department} className="flex items-center gap-4">
               <span>{dept.department}</span>
               <span className="flex items-center gap-1 font-mono">
@@ -288,7 +269,7 @@ export default function DisplayPage() {
             </div>
           ))}
           {/* Duplicate for infinite effect */}
-          {departments.map((dept) => (
+          {departments.map((dept: DepartmentDisplay) => (
             <div key={`${dept.department}-dup`} className="flex items-center gap-4">
               <span>{dept.department}</span>
               <span className="flex items-center gap-1 font-mono">

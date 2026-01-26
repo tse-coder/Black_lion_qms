@@ -27,8 +27,8 @@ router.use('/users', userRoutes);
 router.use('/patients', patientRoutes);
 router.use('/queues', queueRoutes);
 router.use('/notifications', notificationRoutes);
-router.use('/api', doctorRoutes);
 router.use('/api', displayRoutes);
+router.use('/api', doctorRoutes);
 router.use('/appointments', appointmentRoutes);
 
 export default router;
