@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSocket } from '@/contexts/SocketContext';
+import { useToast } from '@/hooks/use-toast';
 import { QueueStatusCard } from '@/components/queue';
-import { Queue } from '@/lib/api';
+import { queueApi, Queue } from '@/lib/api';
 import {
   User,
   Clock,
@@ -67,23 +69,55 @@ const MOCK_QUEUE_HISTORY: Queue[] = [
 export default function PatientDashboard() {
   const { t } = useLanguage();
   const { user } = useAuth();
-  const [activeQueues, setActiveQueues] = useState<Queue[]>(MOCK_PATIENT_QUEUES);
-  const [queueHistory, setQueueHistory] = useState<Queue[]>(MOCK_QUEUE_HISTORY);
+  const [activeQueues, setActiveQueues] = useState<Queue[]>([]);
+  const [queueHistory, setQueueHistory] = useState<Queue[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { socket } = useSocket();
+  const { toast } = useToast();
 
   const fetchData = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const response = await queueApi.getQueues();
+      if (response.data.success) {
+        const queues = response.data.data.queues;
+        setActiveQueues(queues.filter((q: Queue) => q.status === 'Waiting' || q.status === 'InProgress'));
+        setQueueHistory(queues.filter((q: Queue) => q.status === 'Complete' || q.status === 'Cancelled'));
+      }
+    } catch (error) {
+      console.error('Failed to fetch patient queues:', error);
+    }
     setIsLoading(false);
   };
 
   useEffect(() => {
     fetchData();
-    // Poll for updates
-    const interval = setInterval(fetchData, 30000);
+    
+    if (socket) {
+      const handleQueueUpdate = () => {
+        fetchData();
+      };
+
+      const handlePatientCalled = (payload: any) => {
+        fetchData();
+        // Show a more prominent notification if the patient is called
+        alert(`You are being called! Please proceed to ${payload.department} to see ${payload.doctorName}.`);
+      };
+
+      socket.on('queue:updated', handleQueueUpdate);
+      socket.on('patient:called', handlePatientCalled);
+      socket.on('patient:completed', handleQueueUpdate);
+
+      return () => {
+        socket.off('queue:updated', handleQueueUpdate);
+        socket.off('patient:called', handlePatientCalled);
+        socket.off('patient:completed', handleQueueUpdate);
+      };
+    }
+
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [socket]);
 
   return (
     <MainLayout title="My Healthcare Dashboard">

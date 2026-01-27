@@ -46,6 +46,56 @@ const userRegistrationSchema = Joi.object({
     'string.pattern.base': 'Phone number must be in Ethiopian format (+2519xxxxxxxx)',
     'any.required': 'Phone number is required',
   }),
+  // Patient fields (required if role is Patient)
+  cardNumber: Joi.string().when('role', {
+    is: 'Patient',
+    then: Joi.required(),
+    otherwise: Joi.optional()
+  }),
+  medicalRecordNumber: Joi.string().when('role', {
+    is: 'Patient',
+    then: Joi.required(),
+    otherwise: Joi.optional()
+  }),
+  dateOfBirth: Joi.date().iso().when('role', {
+    is: 'Patient',
+    then: Joi.required(),
+    otherwise: Joi.optional()
+  }),
+  gender: Joi.string().valid('Male', 'Female', 'Other').when('role', {
+    is: 'Patient',
+    then: Joi.required(),
+    otherwise: Joi.optional()
+  }),
+  address: Joi.string().allow('', null),
+  emergencyContactName: Joi.string().allow('', null),
+  emergencyContactPhone: Joi.string().pattern(/^\+251[9][0-9]{8}$/).allow('', null),
+  bloodType: Joi.string().valid('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-').allow('', null),
+  allergies: Joi.string().allow('', null),
+  chronicConditions: Joi.string().allow('', null),
+});
+
+// Profile update validation schema
+const updateProfileSchema = Joi.object({
+  firstName: Joi.string().min(2).max(50).optional(),
+  lastName: Joi.string().min(2).max(50).optional(),
+  email: Joi.string().email().optional(),
+  phoneNumber: Joi.string().pattern(/^\+251[9][0-9]{8}$/).optional(),
+  // Patient fields
+  address: Joi.string().allow('', null),
+  emergencyContactName: Joi.string().allow('', null),
+  emergencyContactPhone: Joi.string().pattern(/^\+251[9][0-9]{8}$/).allow('', null),
+  bloodType: Joi.string().valid('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-').allow('', null),
+  allergies: Joi.string().allow('', null),
+  chronicConditions: Joi.string().allow('', null),
+});
+
+// Change password validation schema
+const changePasswordSchema = Joi.object({
+  currentPassword: Joi.string().required(),
+  newPassword: Joi.string().min(6).required().messages({
+    'string.min': 'New password must be at least 6 characters long',
+  }),
 });
 
 // Queue creation validation schema
@@ -88,9 +138,9 @@ const validate = (schema) => {
         message: 'Request body is missing or invalid. Make sure Content-Type is application/json',
       });
     }
-    
+
     const { error } = schema.validate(req.body, { abortEarly: false });
-    
+
     if (error) {
       const errorMessages = error.details.map(detail => detail.message);
       return res.status(400).json({
@@ -99,9 +149,9 @@ const validate = (schema) => {
         details: errorMessages,
       });
     }
-    
+
     next();
   };
 };
 
-export { validate, loginSchema, userRegistrationSchema, queueSchema };
+export { validate, loginSchema, userRegistrationSchema, queueSchema, updateProfileSchema, changePasswordSchema };

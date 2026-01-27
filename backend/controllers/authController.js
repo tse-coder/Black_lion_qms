@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import db from '../models/index.js';
+import { logActivity } from '../utils/activityLogger.js';
 
 // Generate JWT Token
 const generateToken = (userId, role) => {
@@ -45,7 +46,7 @@ const login = async (req, res) => {
 
     // Validate password
     const isValidPassword = await user.validatePassword(password);
-    
+
     if (!isValidPassword) {
       return res.status(401).json({
         error: 'Authentication Failed',
@@ -82,7 +83,7 @@ const login = async (req, res) => {
 
     // Role-specific responses
     let roleSpecificData = {};
-    
+
     switch (user.role) {
       case 'Patient':
         roleSpecificData = {
@@ -90,21 +91,21 @@ const login = async (req, res) => {
           permissions: ['view_own_queues', 'join_queue', 'update_profile'],
         };
         break;
-      
+
       case 'Doctor':
         roleSpecificData = {
           dashboard: '/doctor/dashboard',
           permissions: ['manage_patient_queues', 'view_patient_history', 'update_queue_status'],
         };
         break;
-      
+
       case 'Lab Technician':
         roleSpecificData = {
           dashboard: '/lab/dashboard',
           permissions: ['manage_lab_queues', 'update_lab_results', 'view_lab_history'],
         };
         break;
-      
+
       case 'Admin':
         roleSpecificData = {
           dashboard: '/admin/dashboard',
@@ -112,6 +113,15 @@ const login = async (req, res) => {
         };
         break;
     }
+
+    // Log the login
+    await logActivity({
+      userId: user.id,
+      type: 'AUTH',
+      action: 'LOGIN',
+      description: `${user.firstName} logged in as ${user.role}`,
+      req
+    });
 
     res.status(200).json({
       success: true,
@@ -169,8 +179,17 @@ const getCurrentUser = async (req, res) => {
 // Logout (Client-side token removal, but we can track it)
 const logout = async (req, res) => {
   try {
-    // In a real implementation, you might want to blacklist the token
-    // For now, we'll just return success since JWT is stateless
+    // Log the logout
+    if (req.user) {
+      await logActivity({
+        userId: req.user.id,
+        type: 'AUTH',
+        action: 'LOGOUT',
+        description: `User ${user.firstName} logged out`,
+        req
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: 'Logout successful',

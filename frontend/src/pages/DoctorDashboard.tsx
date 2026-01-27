@@ -122,7 +122,18 @@ export default function DoctorDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [data, setData] = useState<ActiveQueueData>(MOCK_DOCTOR_DATA);
+  const [data, setData] = useState<ActiveQueueData>({
+    department: '',
+    currentPatient: null,
+    waitingPatients: [],
+    statistics: {
+      totalWaiting: 0,
+      urgentCases: 0,
+      highPriority: 0,
+      averageWaitTime: 0,
+    },
+    doctorId: '',
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [isCallingNext, setIsCallingNext] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -149,25 +160,33 @@ export default function DoctorDashboard() {
         }
       }
     } catch (error) {
-      // Use mock data if API fails
-      console.log('Using mock doctor data');
+      console.error('Failed to fetch doctor data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch real-time queue data.',
+        variant: 'destructive',
+      });
     }
     setIsLoading(false);
-  }, []);
+  }, [activeDept]);
 
   useEffect(() => {
+    const handleUpdate = (payload: any) => {
+      if (payload.department === activeDept || !activeDept) {
+        console.log('[SOCKET] Queue update received');
+        fetchData();
+      }
+    };
+
     fetchData();
 
     if (socket) {
-      socket.on('queue:updated', (payload: any) => {
-        if (payload.department === activeDept || !activeDept) {
-          console.log('[SOCKET] Queue update received');
-          fetchData();
-        }
-      });
+      socket.on('queue:updated', handleUpdate);
+      socket.on('display:updated', handleUpdate);
 
       return () => {
-        socket.off('queue:updated');
+        socket.off('queue:updated', handleUpdate);
+        socket.off('display:updated', handleUpdate);
       };
     }
   }, [fetchData, socket, activeDept]);
@@ -185,29 +204,12 @@ export default function DoctorDashboard() {
         fetchData();
       }
     } catch (error: any) {
-      // Demo: simulate calling next patient
-      if (data.waitingPatients.length > 0) {
-        const nextPatient = data.waitingPatients[0];
-        setData(prev => ({
-          ...prev,
-          currentPatient: { ...nextPatient, status: 'InProgress', serviceStartTime: new Date().toISOString() },
-          waitingPatients: prev.waitingPatients.slice(1),
-          statistics: {
-            ...prev.statistics,
-            totalWaiting: prev.statistics.totalWaiting - 1,
-          },
-        }));
-        toast({
-          title: t('success'),
-          description: `${nextPatient.patient?.user.firstName} has been called`,
-        });
-      } else {
-        toast({
-          title: 'No patients',
-          description: 'There are no patients waiting',
-          variant: 'destructive',
-        });
-      }
+      console.error('Call next error:', error);
+      toast({
+        title: 'Call Next Failed',
+        description: error.response?.data?.message || 'Failed to call the next patient.',
+        variant: 'destructive',
+      });
     }
     setIsCallingNext(false);
   };
@@ -225,17 +227,12 @@ export default function DoctorDashboard() {
         fetchData();
       }
     } catch (error: any) {
-      // Demo: simulate completing patient
-      if (data.currentPatient) {
-        toast({
-          title: t('success'),
-          description: `${data.currentPatient.patient?.user.firstName}'s consultation completed`,
-        });
-        setData(prev => ({
-          ...prev,
-          currentPatient: null,
-        }));
-      }
+      console.error('Complete error:', error);
+      toast({
+        title: 'Completion Failed',
+        description: error.response?.data?.message || 'Failed to complete the patient session.',
+        variant: 'destructive',
+      });
     }
     setIsCompleting(false);
   };
@@ -272,7 +269,7 @@ export default function DoctorDashboard() {
                   <SelectItem value="Radiology">Radiology</SelectItem>
                   <SelectItem value="Pharmacy">Pharmacy</SelectItem>
                   <SelectItem value="Emergency">Emergency</SelectItem>
-                  <SelectItem value="General Consultation">General Medicine</SelectItem>
+                  <SelectItem value="General Medicine">General Medicine</SelectItem>
                 </SelectContent>
              </Select>
           </div>

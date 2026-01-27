@@ -9,36 +9,34 @@ class EmrService {
         id: 'patient-uuid-001',
         cardNumber: 'CARD-001',
         medicalRecordNumber: 'MRN-2023-001',
-        firstName: 'Abebe',
-        lastName: 'Kebede',
+        firstName: 'Demo',
+        lastName: 'Patient 1',
         dateOfBirth: '1985-05-15',
         gender: 'Male',
         phoneNumber: '+251911234567',
-        email: 'abebe.kebede@email.com',
+        email: 'demo1@email.com',
         address: 'Bole, Addis Ababa',
-        emergencyContactName: 'Tigist Kebede',
+        emergencyContactName: 'Contact 1',
         emergencyContactPhone: '+251911234568',
         bloodType: 'O+',
-        allergies: 'Penicillin, Peanuts',
-        chronicConditions: 'Hypertension, Type 2 Diabetes',
+        allergies: 'None',
+        chronicConditions: 'None',
         isActive: true,
         registrationDate: '2020-01-15',
         lastVisit: '2023-12-15',
-        insuranceProvider: 'Ethiopian Insurance',
-        insurancePolicyNumber: 'EI-123456',
       },
       'CARD-002': {
         id: 'patient-uuid-002',
         cardNumber: 'CARD-002',
         medicalRecordNumber: 'MRN-2023-002',
-        firstName: 'Tigist',
-        lastName: 'Haile',
+        firstName: 'Demo',
+        lastName: 'Patient 2',
         dateOfBirth: '1992-08-22',
         gender: 'Female',
         phoneNumber: '+251912345678',
-        email: 'tigist.haile@email.com',
+        email: 'demo2@email.com',
         address: 'Kirkos, Addis Ababa',
-        emergencyContactName: 'Haile Mariam',
+        emergencyContactName: 'Contact 2',
         emergencyContactPhone: '+251912345679',
         bloodType: 'A+',
         allergies: 'None',
@@ -46,65 +44,59 @@ class EmrService {
         isActive: true,
         registrationDate: '2021-03-20',
         lastVisit: '2023-12-20',
-        insuranceProvider: 'Nile Insurance',
-        insurancePolicyNumber: 'NI-789012',
       },
       'CARD-003': {
         id: 'patient-uuid-003',
         cardNumber: 'CARD-003',
         medicalRecordNumber: 'MRN-2023-003',
-        firstName: 'Mohamed',
-        lastName: 'Hassan',
+        firstName: 'Demo',
+        lastName: 'Patient 3',
         dateOfBirth: '1978-11-30',
         gender: 'Male',
         phoneNumber: '+251913456789',
-        email: 'mohamed.hassan@email.com',
+        email: 'demo3@email.com',
         address: 'Arada, Addis Ababa',
-        emergencyContactName: 'Fatima Hassan',
+        emergencyContactName: 'Contact 3',
         emergencyContactPhone: '+251913456790',
         bloodType: 'B+',
-        allergies: 'Sulfa drugs',
-        chronicConditions: 'Asthma',
+        allergies: 'None',
+        chronicConditions: 'None',
         isActive: true,
         registrationDate: '2019-07-10',
         lastVisit: '2023-12-18',
-        insuranceProvider: 'Awash Insurance',
-        insurancePolicyNumber: 'AI-345678',
       },
       'CARD-004': {
         id: 'patient-uuid-004',
         cardNumber: 'CARD-004',
         medicalRecordNumber: 'MRN-2023-004',
-        firstName: 'Almaz',
-        lastName: 'Bekele',
+        firstName: 'Demo',
+        lastName: 'Patient 4',
         dateOfBirth: '1965-03-12',
         gender: 'Female',
         phoneNumber: '+251914567890',
-        email: 'almaz.bekele@email.com',
+        email: 'demo4@email.com',
         address: 'Yeka, Addis Ababa',
-        emergencyContactName: 'Bekele Tesfaye',
+        emergencyContactName: 'Contact 4',
         emergencyContactPhone: '+251914567891',
         bloodType: 'AB+',
-        allergies: 'Latex, Shellfish',
-        chronicConditions: 'Hypertension, Arthritis',
+        allergies: 'None',
+        chronicConditions: 'None',
         isActive: true,
         registrationDate: '2018-02-28',
         lastVisit: '2023-12-22',
-        insuranceProvider: 'Ethiopian Insurance',
-        insurancePolicyNumber: 'EI-234567',
       },
       'CARD-005': {
         id: 'patient-uuid-005',
         cardNumber: 'CARD-005',
         medicalRecordNumber: 'MRN-2023-005',
-        firstName: 'Samuel',
-        lastName: 'Tadesse',
+        firstName: 'Demo',
+        lastName: 'Patient 5',
         dateOfBirth: '2001-06-25',
         gender: 'Male',
         phoneNumber: '+251915678901',
-        email: 'samuel.tadesse@email.com',
+        email: 'demo5@email.com',
         address: 'Lideta, Addis Ababa',
-        emergencyContactName: 'Tadesse Wondimu',
+        emergencyContactName: 'Contact 5',
         emergencyContactPhone: '+251915678902',
         bloodType: 'O-',
         allergies: 'None',
@@ -112,8 +104,6 @@ class EmrService {
         isActive: true,
         registrationDate: '2022-09-15',
         lastVisit: '2023-12-25',
-        insuranceProvider: 'Nile Insurance',
-        insurancePolicyNumber: 'NI-890123',
       },
     };
 
@@ -234,15 +224,15 @@ class EmrService {
   // Validate patient card and get patient information
   async validatePatientCard(cardNumber) {
     console.log(`[MOCK EMR CALL] Validating patient card: ${cardNumber}`);
-    
+
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
     const patient = this.mockPatients[cardNumber];
-    
+
     if (patient) {
       console.log(`[MOCK EMR CALL] Patient validation successful for: ${patient.firstName} ${patient.lastName}`);
-      
+
       return {
         success: true,
         data: {
@@ -256,7 +246,7 @@ class EmrService {
       };
     } else {
       console.log(`[MOCK EMR CALL] Patient card validation failed: Card not found`);
-      
+
       return {
         success: false,
         error: 'PATIENT_NOT_FOUND',
@@ -270,7 +260,7 @@ class EmrService {
   // Get patient medical history
   async getPatientHistory(patientId) {
     console.log(`[MOCK EMR CALL] Fetching patient history for: ${patientId}`);
-    
+
     // Simulate database query delay
     await new Promise(resolve => setTimeout(resolve, 600));
 
@@ -302,7 +292,7 @@ class EmrService {
     };
 
     console.log(`[MOCK EMR CALL] Patient history retrieved successfully - ${visits.length} visits found`);
-    
+
     return {
       success: true,
       data: medicalHistory,
@@ -315,17 +305,17 @@ class EmrService {
   // Check if patient has any outstanding appointments
   async checkOutstandingAppointments(patientId) {
     console.log(`[MOCK EMR CALL] Checking outstanding appointments for: ${patientId}`);
-    
+
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 400));
 
     const appointments = this.mockAppointments[patientId] || [];
-    const outstandingAppointments = appointments.filter(apt => 
+    const outstandingAppointments = appointments.filter(apt =>
       apt.status === 'Scheduled' && new Date(apt.date) >= new Date()
     );
 
     console.log(`[MOCK EMR CALL] Found ${outstandingAppointments.length} outstanding appointments`);
-    
+
     return {
       success: true,
       data: {
@@ -341,7 +331,7 @@ class EmrService {
   // Update patient information in EMR
   async updatePatientInfo(patientId, updateData) {
     console.log(`[MOCK EMR CALL] Updating patient information for: ${patientId}`, updateData);
-    
+
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -357,9 +347,9 @@ class EmrService {
     // In a real EMR, this would update the database
     // For mock, we just simulate the update
     const updatedFields = Object.keys(updateData);
-    
+
     console.log(`[MOCK EMR CALL] Patient information updated successfully - Fields: ${updatedFields.join(', ')}`);
-    
+
     return {
       success: true,
       data: {
@@ -377,7 +367,7 @@ class EmrService {
   // Get patient medications
   async getPatientMedications(patientId) {
     console.log(`[MOCK EMR CALL] Fetching patient medications for: ${patientId}`);
-    
+
     await new Promise(resolve => setTimeout(resolve, 300));
 
     const visits = this.mockVisitHistory[patientId] || [];
@@ -398,7 +388,7 @@ class EmrService {
   // Get patient allergies
   async getPatientAllergies(patientId) {
     console.log(`[MOCK EMR CALL] Fetching patient allergies for: ${patientId}`);
-    
+
     await new Promise(resolve => setTimeout(resolve, 200));
 
     const patient = Object.values(this.mockPatients).find(p => p.id === patientId);
@@ -434,11 +424,11 @@ class EmrService {
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
-    
+
     return age;
   }
 
@@ -481,8 +471,8 @@ class EmrService {
 
     return {
       bloodPressure: bloodPressure,
-      trend: bloodPressure.length >= 2 ? 
-        (bloodPressure[bloodPressure.length - 1].systolic > bloodPressure[0].systolic ? 'Increasing' : 'Stable') 
+      trend: bloodPressure.length >= 2 ?
+        (bloodPressure[bloodPressure.length - 1].systolic > bloodPressure[0].systolic ? 'Increasing' : 'Stable')
         : 'Insufficient data',
     };
   }

@@ -1,4 +1,5 @@
 import db from '../models/index.js';
+import { logActivity } from '../utils/activityLogger.js';
 import notificationService from '../services/notificationService.js';
 import { Sequelize } from 'sequelize';
 
@@ -8,7 +9,7 @@ const getActiveQueues = async (req, res) => {
     const doctorId = req.user.id;
 
     // For now, we'll prioritized: 1. Query Param, 2. Derivation, 3. Default
-    const doctorDepartment = req.query.department || await getDoctorDepartment(doctorId) || 'General Consultation';
+    const doctorDepartment = req.query.department || await getDoctorDepartment(doctorId) || 'General Medicine';
 
     if (!doctorDepartment) {
       return res.status(400).json({
@@ -188,6 +189,20 @@ const callNextPatient = async (req, res) => {
       ],
     });
 
+    // Log the event
+    await logActivity({
+      userId: doctorId,
+      type: 'QUEUE',
+      action: 'CALL_PATIENT',
+      description: `Dr. ${req.user.firstName} called patient ${calledPatient.queueNumber} into ${calledPatient.department}`,
+      metadata: {
+        queueNumber: calledPatient.queueNumber,
+        patientId: calledPatient.patientId,
+        department
+      },
+      req
+    });
+
     // Emit socket events
     const io = req.app.get('io');
     if (io) {
@@ -275,14 +290,19 @@ const completePatient = async (req, res) => {
       lastUpdated: new Date(),
     });
 
-    // Send completion SMS notification
-    try {
-      const message = `Dear ${currentPatient.patient.user.firstName}, your consultation with Dr. ${req.user.firstName} ${req.user.lastName} at ${currentPatient.department} is complete. Thank you for your patience.`;
-      await notificationService.sendSMS(currentPatient.patient.user.phoneNumber, message);
-    } catch (smsError) {
-      console.error('Failed to send completion SMS:', smsError);
-      // Continue with the process even if SMS fails
-    }
+    // Log the event
+    await logActivity({
+      userId: doctorId,
+      type: 'QUEUE',
+      action: 'COMPLETE_PATIENT',
+      description: `Dr. ${req.user.firstName} completed consultation for patient ${updatedQueue.queueNumber}`,
+      metadata: {
+        queueNumber: updatedQueue.queueNumber,
+        patientId: updatedQueue.patientId,
+        actualServiceTime
+      },
+      req
+    });
 
     // Emit socket events
     const io = req.app.get('io');
@@ -418,7 +438,7 @@ const getDoctorDepartment = async (doctorId) => {
       attributes: ['department'],
     });
 
-    return waitingQueue ? waitingQueue.department : 'General Consultation';
+    return waitingQueue ? waitingQueue.department : 'General Medicine';
   } catch (error) {
     console.error('Error getting doctor department:', error);
     return null;

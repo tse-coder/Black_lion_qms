@@ -1,8 +1,8 @@
 import express from 'express';
 import { login, getCurrentUser, logout } from '../controllers/authController.js';
-import { register, createPatientProfile } from '../controllers/userController.js';
+import { register, updateProfile, changePassword } from '../controllers/userController.js';
 import { authenticateToken } from '../middleware/auth.js';
-import { validate, loginSchema, userRegistrationSchema } from '../middleware/validation.js';
+import { validate, loginSchema, userRegistrationSchema, updateProfileSchema, changePasswordSchema } from '../middleware/validation.js';
 
 const router = express.Router();
 
@@ -13,6 +13,7 @@ router.post('/register', validate(userRegistrationSchema), register);
 // Protected routes
 router.get('/me', authenticateToken, getCurrentUser);
 router.post('/logout', authenticateToken, logout);
-router.post('/create-patient-profile', authenticateToken, createPatientProfile);
+router.put('/profile', authenticateToken, validate(updateProfileSchema), updateProfile);
+router.put('/change-password', authenticateToken, validate(changePasswordSchema), changePassword);
 
 export default router;

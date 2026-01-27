@@ -30,65 +30,107 @@ import {
   Settings,
   Stethoscope,
   FlaskConical,
-  User,
+  User as UserIcon,
+  UserPlus,
 } from 'lucide-react';
-import { format } from 'date-fns';
-
-// Mock admin data
-const MOCK_STATS = {
-  totalUsers: 156,
-  activeUsers: 142,
-  totalQueues: 89,
-  activeQueues: 23,
-  departments: 8,
-  todayVisits: 67,
-};
-
-const MOCK_DEPARTMENTS = [
-  { name: 'Cardiology', waiting: 5, inProgress: 2, completed: 12 },
-  { name: 'Laboratory', waiting: 8, inProgress: 3, completed: 28 },
-  { name: 'Pharmacy', waiting: 12, inProgress: 2, completed: 45 },
-  { name: 'Radiology', waiting: 3, inProgress: 1, completed: 8 },
-  { name: 'Emergency', waiting: 2, inProgress: 2, completed: 15 },
-  { name: 'General Medicine', waiting: 7, inProgress: 3, completed: 22 },
-  { name: 'Orthopedics', waiting: 4, inProgress: 1, completed: 9 },
-  { name: 'Pediatrics', waiting: 6, inProgress: 2, completed: 18 },
-];
-
-const MOCK_USERS = [
-  { id: '1', name: 'Dr. Solomon Tesfaye', email: 'doctor@blacklion.com', role: 'Doctor', isActive: true, lastLogin: new Date().toISOString() },
-  { id: '2', name: 'Nurse Tigist Haile', email: 'labtech@blacklion.com', role: 'Lab Technician', isActive: true, lastLogin: new Date(Date.now() - 1000 * 60 * 30).toISOString() },
-  { id: '3', name: 'Admin User', email: 'admin@blacklion.com', role: 'Admin', isActive: true, lastLogin: new Date().toISOString() },
-  { id: '4', name: 'Abebe Kebede', email: 'patient@blacklion.com', role: 'Patient', isActive: true, lastLogin: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
-  { id: '5', name: 'Mohamed Hassan', email: 'mohamed@example.com', role: 'Patient', isActive: false, lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() },
-];
-
-const MOCK_NOTIFICATIONS = [
-  { id: '1', type: 'SMS', recipient: '+251911234567', message: 'Your queue number CARD-001 is ready', status: 'sent', sentAt: new Date().toISOString() },
-  { id: '2', type: 'SMS', recipient: '+251912345678', message: 'Your queue number LAB-015 is ready', status: 'sent', sentAt: new Date(Date.now() - 1000 * 60 * 5).toISOString() },
-  { id: '3', type: 'SMS', recipient: '+251913456789', message: 'Your queue number PHR-042 is ready', status: 'failed', sentAt: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
-];
+import { format, formatDistanceToNow } from 'date-fns';
+import { adminApi, userApi, notificationApi, queueApi, User as SystemUser, UserRole, ActivityLog } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { useSocket } from '@/contexts/SocketContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function AdminDashboard() {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [stats, setStats] = useState(MOCK_STATS);
-  const [departments, setDepartments] = useState(MOCK_DEPARTMENTS);
-  const [users, setUsers] = useState(MOCK_USERS);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [stats, setStats] = useState<any>({
+    totalUsers: 0,
+    activeUsers: 0,
+    totalQueues: 0,
+    activeQueues: 0,
+    departments: 0,
+    todayVisits: 0,
+    departmentStats: []
+  });
+  const [users, setUsers] = useState<SystemUser[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [activeQueues, setActiveQueues] = useState<any[]>([]);
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const { socket } = useSocket();
 
   const fetchData = async () => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const [statsRes, usersRes, notifRes, queueRes, activityRes] = await Promise.all([
+        adminApi.getStats(),
+        userApi.getAll(),
+        notificationApi.getHistory(),
+        queueApi.getQueues(),
+        adminApi.getActivityLogs({ limit: 10 })
+      ]);
+
+      if (statsRes.data.success) setStats(statsRes.data.data);
+      if (usersRes.data.success) setUsers(usersRes.data.data.users);
+      if (notifRes.data.success) setNotifications(notifRes.data.data.notifications);
+      if (queueRes.data.success) setActiveQueues(queueRes.data.data.queues);
+      if (activityRes.data.success) setActivityLogs(activityRes.data.data.activities);
+
+    } catch (error) {
+      console.error('Failed to fetch admin data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to sync with server',
+        variant: 'destructive'
+      });
+    }
     setIsLoading(false);
   };
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 60000);
+    
+    if (socket) {
+      const handleActivity = (newLog: ActivityLog) => {
+        setActivityLogs(prev => [newLog, ...prev.slice(0, 9)]);
+        // Also refresh stats since an activity usually means something changed
+        fetchData();
+      };
+
+      const handleQueueUpdate = () => {
+        fetchData();
+      };
+
+      socket.on('activity:new', handleActivity);
+      socket.on('queue:updated', handleQueueUpdate);
+      socket.on('display:updated', handleQueueUpdate);
+
+      return () => {
+        socket.off('activity:new', handleActivity);
+        socket.off('queue:updated', handleQueueUpdate);
+        socket.off('display:updated', handleQueueUpdate);
+      };
+    }
+
+    const interval = setInterval(fetchData, 60000); // Less frequent polling when socket is active
     return () => clearInterval(interval);
-  }, []);
+  }, [socket]);
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -99,7 +141,7 @@ export default function AdminDashboard() {
       case 'Admin':
         return <Shield className="h-4 w-4" />;
       default:
-        return <User className="h-4 w-4" />;
+        return <UserIcon className="h-4 w-4" />;
     }
   };
 
@@ -211,30 +253,34 @@ export default function AdminDashboard() {
                   <CardContent>
                     <ScrollArea className="h-[400px]">
                       <div className="space-y-4">
-                        {departments.map((dept) => (
-                          <div key={dept.name} className="p-4 rounded-lg border">
+                        {stats.departmentStats?.length > 0 ? stats.departmentStats.map((dept: any) => (
+                          <div key={dept.department} className="p-4 rounded-lg border">
                             <div className="flex items-center justify-between mb-3">
-                              <h4 className="font-semibold">{dept.name}</h4>
+                              <h4 className="font-semibold">{dept.department}</h4>
                               <Badge variant="outline">
-                                {dept.waiting + dept.inProgress} active
+                                {(parseInt(dept.waiting) + parseInt(dept.inProgress))} active
                               </Badge>
                             </div>
                             <div className="grid grid-cols-3 gap-2 text-center text-sm">
                               <div className="p-2 bg-status-waiting/10 rounded">
-                                <p className="font-bold text-status-waiting">{dept.waiting}</p>
+                                <p className="font-bold text-status-waiting">{dept.waiting || 0}</p>
                                 <p className="text-xs text-muted-foreground">Waiting</p>
                               </div>
                               <div className="p-2 bg-status-in-progress/10 rounded">
-                                <p className="font-bold text-status-in-progress">{dept.inProgress}</p>
+                                <p className="font-bold text-status-in-progress">{dept.inProgress || 0}</p>
                                 <p className="text-xs text-muted-foreground">In Progress</p>
                               </div>
                               <div className="p-2 bg-status-complete/10 rounded">
-                                <p className="font-bold text-status-complete">{dept.completed}</p>
+                                <p className="font-bold text-status-complete">{dept.completed || 0}</p>
                                 <p className="text-xs text-muted-foreground">Completed</p>
                               </div>
                             </div>
                           </div>
-                        ))}
+                        )) : (
+                          <div className="text-center py-20 text-muted-foreground italic">
+                             No data for any departments yet today.
+                          </div>
+                        )}
                       </div>
                     </ScrollArea>
                   </CardContent>
@@ -247,42 +293,30 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
-                        <div className="p-2 bg-status-complete/10 rounded-full">
-                          <UserCheck className="h-4 w-4 text-status-complete" />
+                      {activityLogs.length > 0 ? activityLogs.map((log) => (
+                        <div key={log.id} className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
+                          <div className={`p-2 rounded-full ${
+                            log.type === 'AUTH' ? 'bg-primary/10' : 
+                            log.type === 'QUEUE' ? 'bg-status-in-progress/10' : 
+                            'bg-accent/10'
+                          }`}>
+                            {log.type === 'AUTH' ? <UserIcon className="h-4 w-4 text-primary" /> : 
+                             log.type === 'QUEUE' ? <Activity className="h-4 w-4 text-status-in-progress" /> : 
+                             <Bell className="h-4 w-4 text-accent" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{log.description}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {log.metadata?.department ? `${log.metadata.department} • ` : ''}
+                              {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium">Patient CARD-001 completed</p>
-                          <p className="text-xs text-muted-foreground">Cardiology - 2 mins ago</p>
+                      )) : (
+                        <div className="text-center py-10 text-muted-foreground italic">
+                          No recent activity logs.
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
-                        <div className="p-2 bg-status-in-progress/10 rounded-full">
-                          <Activity className="h-4 w-4 text-status-in-progress" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Patient LAB-016 called</p>
-                          <p className="text-xs text-muted-foreground">Laboratory - 5 mins ago</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
-                        <div className="p-2 bg-primary/10 rounded-full">
-                          <Users className="h-4 w-4 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">New patient check-in</p>
-                          <p className="text-xs text-muted-foreground">Emergency - 8 mins ago</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
-                        <div className="p-2 bg-status-waiting/10 rounded-full">
-                          <Bell className="h-4 w-4 text-status-waiting" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">SMS notification sent</p>
-                          <p className="text-xs text-muted-foreground">+251911234567 - 10 mins ago</p>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -298,7 +332,9 @@ export default function AdminDashboard() {
                       <CardTitle>{t('userManagement')}</CardTitle>
                       <CardDescription>Manage system users and roles</CardDescription>
                     </div>
-                    <Button>Add User</Button>
+                    
+                    {/* Add User Dialog */}
+                    <AddUserDialog onSuccess={fetchData} />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -308,17 +344,17 @@ export default function AdminDashboard() {
                         <TableHead>User</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Last Login</TableHead>
+                        <TableHead>Joined</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {users.map((u) => (
+                      {users.length > 0 ? users.map((u) => (
                         <TableRow key={u.id}>
                           <TableCell>
                             <div>
-                              <p className="font-medium">{u.name}</p>
-                              <p className="text-sm text-muted-foreground">{u.email}</p>
+                              <p className="font-medium">{u.firstName} {u.lastName}</p>
+                              <p className="text-sm text-muted-foreground">@{u.username} • {u.email}</p>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -333,13 +369,19 @@ export default function AdminDashboard() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
-                            {format(new Date(u.lastLogin), 'MMM d, HH:mm')}
+                            {u.createdAt ? format(new Date(u.createdAt), 'MMM d, yyyy') : 'N/A'}
                           </TableCell>
                           <TableCell>
                             <Button variant="ghost" size="sm">Edit</Button>
                           </TableCell>
                         </TableRow>
-                      ))}
+                      )) : (
+                        <TableRow>
+                           <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                              No users found in the system.
+                           </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
                 </CardContent>
@@ -362,42 +404,28 @@ export default function AdminDashboard() {
                         <TableHead>Department</TableHead>
                         <TableHead>Priority</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Wait Time</TableHead>
+                        <TableHead>Joined</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell className="font-mono font-bold">CARD-001</TableCell>
-                        <TableCell>Abebe Kebede</TableCell>
-                        <TableCell>Cardiology</TableCell>
-                        <TableCell><PriorityBadge priority="Medium" /></TableCell>
-                        <TableCell><StatusBadge status="InProgress" /></TableCell>
-                        <TableCell>15 min</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-mono font-bold">CARD-002</TableCell>
-                        <TableCell>Tigist Haile</TableCell>
-                        <TableCell>Cardiology</TableCell>
-                        <TableCell><PriorityBadge priority="High" /></TableCell>
-                        <TableCell><StatusBadge status="Waiting" /></TableCell>
-                        <TableCell>22 min</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-mono font-bold">LAB-015</TableCell>
-                        <TableCell>Samuel Tadesse</TableCell>
-                        <TableCell>Laboratory</TableCell>
-                        <TableCell><PriorityBadge priority="Low" /></TableCell>
-                        <TableCell><StatusBadge status="InProgress" /></TableCell>
-                        <TableCell>8 min</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-mono font-bold">EMR-003</TableCell>
-                        <TableCell>Urgent Patient</TableCell>
-                        <TableCell>Emergency</TableCell>
-                        <TableCell><PriorityBadge priority="Urgent" /></TableCell>
-                        <TableCell><StatusBadge status="InProgress" /></TableCell>
-                        <TableCell>2 min</TableCell>
-                      </TableRow>
+                      {activeQueues.length > 0 ? activeQueues.map((q) => (
+                        <TableRow key={q.id}>
+                          <TableCell className="font-mono font-bold">{q.queueNumber}</TableCell>
+                          <TableCell>{q.patient?.user?.firstName} {q.patient?.user?.lastName}</TableCell>
+                          <TableCell>{q.department}</TableCell>
+                          <TableCell><PriorityBadge priority={q.priority} /></TableCell>
+                          <TableCell><StatusBadge status={q.status} /></TableCell>
+                          <TableCell className="text-xs text-muted-foreground text-nowrap">
+                             {formatDistanceToNow(new Date(q.joinedAt), { addSuffix: true })}
+                          </TableCell>
+                        </TableRow>
+                      )) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-6 text-muted-foreground italic">
+                            No active queues at the moment.
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
                 </CardContent>
@@ -413,7 +441,6 @@ export default function AdminDashboard() {
                       <CardTitle>Notification History</CardTitle>
                       <CardDescription>SMS and system notifications log</CardDescription>
                     </div>
-                    <Button>Send Notification</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -454,5 +481,146 @@ export default function AdminDashboard() {
         </div>
       </div>
     </MainLayout>
+  );
+}
+
+function AddUserDialog({ onSuccess }: { onSuccess: () => void }) {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    phoneNumber: '',
+    role: 'Doctor' as UserRole,
+    password: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await adminApi.createUser(formData);
+      if (res.data.success) {
+        toast({ title: 'Success', description: 'User created successfully' });
+        setOpen(false);
+        onSuccess();
+        setFormData({
+            firstName: '', lastName: '', username: '', email: '',
+            phoneNumber: '', role: 'Doctor', password: ''
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to create user',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="gap-2">
+           <UserPlus className="h-4 w-4" />
+           Add System User
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Register New Staff/User</DialogTitle>
+          <DialogDescription>
+            Create accounts for Doctors, Lab Technicians, or Admins.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>First Name</Label>
+              <Input 
+                required 
+                value={formData.firstName} 
+                onChange={e => setFormData({...formData, firstName: e.target.value})} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Last Name</Label>
+              <Input 
+                required 
+                value={formData.lastName} 
+                onChange={e => setFormData({...formData, lastName: e.target.value})} 
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Username</Label>
+              <Input 
+                required 
+                value={formData.username} 
+                onChange={e => setFormData({...formData, username: e.target.value})} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input 
+                type="email" 
+                required 
+                value={formData.email} 
+                onChange={e => setFormData({...formData, email: e.target.value})} 
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Phone Number</Label>
+            <Input 
+              required 
+              placeholder="+2519..."
+              value={formData.phoneNumber} 
+              onChange={e => setFormData({...formData, phoneNumber: e.target.value})} 
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select 
+                value={formData.role} 
+                onValueChange={(v: any) => setFormData({...formData, role: v})}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Doctor">Doctor</SelectItem>
+                  <SelectItem value="Lab Technician">Lab Technician</SelectItem>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="Patient">Patient</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Initial Password</Label>
+              <Input 
+                type="password" 
+                required 
+                value={formData.password} 
+                onChange={e => setFormData({...formData, password: e.target.value})} 
+              />
+            </div>
+          </div>
+          <div className="flex justify-end pt-4">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create User'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

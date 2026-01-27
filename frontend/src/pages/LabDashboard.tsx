@@ -6,7 +6,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Queue } from '@/lib/api';
+import { queueApi, Queue } from '@/lib/api';
+import { useSocket } from '@/contexts/SocketContext';
 import { PriorityBadge } from '@/components/queue';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -100,42 +101,84 @@ export default function LabDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [data, setData] = useState(MOCK_LAB_DATA);
+  const [data, setData] = useState<LabData>({
+    department: 'Laboratory',
+    currentPatient: null,
+    waitingPatients: [],
+    statistics: {
+      totalWaiting: 0,
+      pendingTests: 0,
+      completedToday: 0,
+      averageWaitTime: 0,
+    },
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [isCallingNext, setIsCallingNext] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const { socket } = useSocket();
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const response = await queueApi.getActive('Laboratory');
+      if (response.data.success) {
+        setData({
+          department: response.data.data.department,
+          currentPatient: response.data.data.currentPatient || null,
+          waitingPatients: response.data.data.waitingPatients,
+          statistics: {
+            totalWaiting: response.data.data.statistics.totalWaiting,
+            pendingTests: response.data.data.statistics.totalWaiting, // Map total waiting to pending
+            completedToday: 0, // Stats need more backend support for "today"
+            averageWaitTime: response.data.data.statistics.averageWaitTime,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch lab data:', error);
+    }
     setIsLoading(false);
   }, []);
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 30000);
+    
+    if (socket) {
+      const handleUpdate = (payload: any) => {
+        if (payload.department === 'Laboratory' || !payload.department) {
+          fetchData();
+        }
+      };
+
+      socket.on('queue:updated', handleUpdate);
+      socket.on('display:updated', handleUpdate);
+
+      return () => {
+        socket.off('queue:updated', handleUpdate);
+        socket.off('display:updated', handleUpdate);
+      };
+    }
+
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
-  }, [fetchData]);
+  }, [fetchData, socket]);
 
   const handleCallNext = async () => {
     setIsCallingNext(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (data.waitingPatients.length > 0) {
-      const nextPatient = data.waitingPatients[0];
-      setData(prev => ({
-        ...prev,
-        currentPatient: { ...nextPatient, status: 'InProgress', serviceStartTime: new Date().toISOString() },
-        waitingPatients: prev.waitingPatients.slice(1),
-        statistics: {
-          ...prev.statistics,
-          totalWaiting: prev.statistics.totalWaiting - 1,
-        },
-      }));
+    try {
+      const response = await queueApi.doctorCallNext('Laboratory');
+      if (response.data.success) {
+        toast({
+          title: 'Patient Called',
+          description: `Patient has been called for testing`,
+        });
+        fetchData();
+      }
+    } catch (error: any) {
       toast({
-        title: 'Patient Called',
-        description: `${nextPatient.patient?.user.firstName} has been called for testing`,
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to call next patient',
+        variant: 'destructive',
       });
     }
     setIsCallingNext(false);
@@ -143,21 +186,21 @@ export default function LabDashboard() {
 
   const handleComplete = async () => {
     setIsCompleting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (data.currentPatient) {
+    try {
+      const response = await queueApi.complete();
+      if (response.data.success) {
+        toast({
+          title: 'Test Completed',
+          description: `Lab test completed successfully`,
+        });
+        fetchData();
+      }
+    } catch (error: any) {
       toast({
-        title: 'Test Completed',
-        description: `${data.currentPatient.patient?.user.firstName}'s lab test completed`,
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to complete test',
+        variant: 'destructive',
       });
-      setData(prev => ({
-        ...prev,
-        currentPatient: null as any,
-        statistics: {
-          ...prev.statistics,
-          completedToday: prev.statistics.completedToday + 1,
-        },
-      }));
     }
     setIsCompleting(false);
   };

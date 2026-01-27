@@ -57,6 +57,7 @@ export interface User {
   isActive: boolean;
   lastLogin?: string;
   createdAt?: string;
+  patientProfile?: Patient;
 }
 
 export interface Patient {
@@ -94,6 +95,22 @@ export interface Queue {
       lastName: string;
       phoneNumber?: string;
     };
+  };
+}
+
+export interface ActivityLog {
+  id: string;
+  userId: string;
+  type: string;
+  action: string;
+  description: string;
+  metadata: any;
+  createdAt: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+    username: string;
+    role: string;
   };
 }
 
@@ -138,15 +155,11 @@ export const authApi = {
   login: (email: string, password: string) =>
     api.post<ApiResponse<{ user: User; token: string; expiresIn: string }>>('/auth/login', { email, password }),
   
-  register: (data: {
-    username: string;
-    email: string;
-    password: string;
-    role: UserRole;
-    firstName: string;
-    lastName: string;
-    phoneNumber: string;
-  }) => api.post<ApiResponse<{ user: User }>>('/auth/register', data),
+  register: (data: any) => api.post<ApiResponse<{ user: User }>>('/auth/register', data),
+  
+  updateProfile: (data: any) => api.put<ApiResponse<{ user: User }>>('/auth/profile', data),
+  
+  changePassword: (data: any) => api.put<ApiResponse<any>>('/auth/change-password', data),
   
   getMe: () => api.get<ApiResponse<{ user: User }>>('/auth/me'),
   
@@ -318,6 +331,32 @@ export const appointmentApi = {
   }) => api.post<ApiResponse<{ appointment: any; cardNumber: string }>>('/appointments', data),
   
   getAll: () => api.get<ApiResponse<{ appointments: any[] }>>('/appointments'),
+};
+
+// Admin API
+export const adminApi = {
+  getStats: () => api.get<ApiResponse<{
+     totalUsers: number;
+     activeUsers: number;
+     totalQueues: number;
+     activeQueues: number;
+     departments: number;
+     todayVisits: number;
+     departmentStats: any[];
+  }>>('/admin/stats'),
+
+  getActivityLogs: (params?: { limit?: number; offset?: number; type?: string; action?: string }) =>
+    api.get<ApiResponse<{ activities: ActivityLog[] }>>('/admin/activities', { params }),
+
+  createUser: (data: {
+    username: string;
+    email: string;
+    password: string;
+    role: UserRole;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+  }) => api.post<ApiResponse<{ user: User }>>('/admin/users', data),
 };
 
 // Health check

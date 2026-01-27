@@ -3,6 +3,7 @@ import User from './User.js';
 import Patient from './Patient.js';
 import Queue from './Queue.js';
 import Appointment from './Appointment.js';
+import ActivityLog from './ActivityLog.js';
 
 // Define associations
 User.hasOne(Patient, {
@@ -45,6 +46,16 @@ Queue.belongsTo(User, {
   as: 'doctor',
 });
 
+User.hasMany(ActivityLog, {
+  foreignKey: 'userId',
+  as: 'activities',
+});
+
+ActivityLog.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+});
+
 // Export models and sequelize instance
 const db = {
   sequelize,
@@ -52,6 +63,7 @@ const db = {
   Patient,
   Queue,
   Appointment,
+  ActivityLog,
 };
 
 export default db;

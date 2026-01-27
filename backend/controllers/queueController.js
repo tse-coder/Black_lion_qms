@@ -1,4 +1,5 @@
 import db from '../models/index.js';
+import { logActivity } from '../utils/activityLogger.js';
 import emrService from '../services/emrService.js';
 import notificationService from '../services/notificationService.js';
 import { Sequelize } from 'sequelize';
@@ -136,9 +137,9 @@ const requestQueueNumber = async (req, res) => {
 
     if (!patient) {
       // Create new patient record if not found
-      // First, create user account if doesn't exist
+      // Check if a user with this phone number already exists
       let user = await db.User.findOne({
-        where: { email: `${patientData.cardNumber}@patient.blacklion.gov.et` },
+        where: { phoneNumber: patientData.phoneNumber }
       });
 
       if (!user) {
@@ -150,6 +151,12 @@ const requestQueueNumber = async (req, res) => {
           firstName: patientData.firstName,
           lastName: patientData.lastName,
           phoneNumber: patientData.phoneNumber,
+        });
+      } else {
+        // Update existing user with new name if provided (syncing with EMR)
+        await user.update({
+          firstName: patientData.firstName || user.firstName,
+          lastName: patientData.lastName || user.lastName,
         });
       }
 
@@ -228,7 +235,6 @@ const requestQueueNumber = async (req, res) => {
       console.error('Failed to send SMS notification:', smsError);
       // Continue with the process even if SMS fails
     }
-
     // Step 7: Fetch the complete queue entry with associations
     const createdQueue = await db.Queue.findByPk(queue.id, {
       include: [
@@ -244,6 +250,20 @@ const requestQueueNumber = async (req, res) => {
           ],
         },
       ],
+    });
+
+    // Log the check-in
+    await logActivity({
+      userId: patient.userId,
+      type: 'QUEUE',
+      action: 'CHECK_IN',
+      description: `Patient ${patient.user.firstName} checked in for ${serviceType} at ${department}`,
+      metadata: {
+        queueNumber: queue.queueNumber,
+        department,
+        serviceType
+      },
+      req
     });
 
     // Step 8: Emit socket events for real-time updates
