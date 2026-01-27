@@ -44,33 +44,6 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-// Demo credentials for quick login
-const DEMO_ACCOUNTS = [
-  {
-    email: "admin@blacklion.com",
-    password: "admin123",
-    role: "Admin",
-    icon: Shield,
-  },
-  {
-    email: "doctor@blacklion.com",
-    password: "doctor123",
-    role: "Doctor",
-    icon: Stethoscope,
-  },
-  {
-    email: "labtech@blacklion.com",
-    password: "labtech123",
-    role: "Lab Technician",
-    icon: FlaskConical,
-  },
-  {
-    email: "patient@blacklion.com",
-    password: "patient123",
-    role: "Patient",
-    icon: User,
-  },
-];
 
 export default function LoginPage() {
   const { t } = useLanguage();
@@ -243,47 +216,6 @@ export default function LoginPage() {
                   </Button>
                 </form>
               </Form>
-
-              {/* Demo Login Section */}
-              <div className="space-y-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full border-gray-100" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-3 text-muted-foreground font-medium">
-                      {t("demoLogin")}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {DEMO_ACCOUNTS.map((account) => {
-                    const Icon = account.icon;
-                    return (
-                      <Button
-                        key={account.email}
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleDemoLogin(account.email, account.password)
-                        }
-                        disabled={isSubmitting || isLoading}
-                        className="flex items-center gap-2 h-10 border-gray-100 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 group"
-                      >
-                        <Icon className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-semibold">
-                          {account.role}
-                        </span>
-                      </Button>
-                    );
-                  })}
-                </div>
-
-                <p className="text-[10px] text-center text-muted-foreground italic">
-                  {t("quickAccess")}
-                </p>
-              </div>
 
               <div className="text-center pt-2">
                 <Separator className="mb-6 border-gray-50" />
