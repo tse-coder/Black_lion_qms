@@ -24,7 +24,7 @@ export const translations = {
     login: 'Login',
     register: 'Register',
     refresh: 'Refresh',
-    
+
     // Navigation
     home: 'Home',
     dashboard: 'Dashboard',
@@ -36,7 +36,7 @@ export const translations = {
     settings: 'Settings',
     notifications: 'Notifications',
     reports: 'Reports',
-    
+
     // Auth
     email: 'Email',
     password: 'Password',
@@ -47,13 +47,13 @@ export const translations = {
     loginAs: 'Login as',
     welcomeBack: 'Welcome Back',
     loginDescription: 'Enter your credentials to access your account',
-    
+
     // Roles
     patient: 'Patient',
     doctor: 'Doctor',
     labTechnician: 'Lab Technician',
     admin: 'Admin',
-    
+
     // Queue
     queueNumber: 'Queue Number',
     department: 'Department',
@@ -70,13 +70,13 @@ export const translations = {
     cancelled: 'Cancelled',
     callNext: 'Call Next',
     completePatient: 'Complete',
-    
+
     // Priority
     urgent: 'Urgent',
     high: 'High',
     medium: 'Medium',
     low: 'Low',
-    
+
     // Departments
     cardiology: 'Cardiology',
     laboratory: 'Laboratory',
@@ -86,7 +86,7 @@ export const translations = {
     generalMedicine: 'General Medicine',
     orthopedics: 'Orthopedics',
     pediatrics: 'Pediatrics',
-    
+
     // Service Types
     generalConsultation: 'General Consultation',
     specialist: 'Specialist',
@@ -94,7 +94,7 @@ export const translations = {
     imaging: 'Imaging',
     medicationPickup: 'Medication Pickup',
     emergencyService: 'Emergency Service',
-    
+
     // Check-in
     checkInTitle: 'Patient Check-in',
     checkInDescription: 'Enter your details to get a queue number',
@@ -107,7 +107,7 @@ export const translations = {
     yourQueueNumber: 'Your Queue Number',
     pleaseWait: 'Please wait for your number to be called',
     printTicket: 'Print Ticket',
-    
+
     // Landing
     welcomeTitle: 'Welcome to Black Lion Hospital',
     welcomeSubtitle: 'Digital Queue Management System',
@@ -115,13 +115,22 @@ export const translations = {
     searchPlaceholder: 'Enter queue number or phone number',
     searchButton: 'Search',
     getNewTicket: 'Get a New Ticket',
-    
+
     // Display
     displayTitle: 'Queue Display',
     refreshing: 'Refreshing...',
     lastUpdated: 'Last Updated',
-    noPatients: 'No patients waiting',
-    
+    noWaitingPatients: 'No patients waiting',
+    fetchError: 'Failed to fetch real-time queue data.',
+    publicDisplayTitle: 'Public Display Board | Black Lion DQMS',
+    medicalQueueStatus: 'Medical Queue Status',
+    current: 'Current',
+    standby: 'Standby',
+    waitingList: 'Waiting List',
+    sectionClear: 'Section Clear',
+    bulletin: 'Bulletin',
+    patientsCount: 'Patients',
+
     // Doctor Dashboard
     doctorDashboard: 'Doctor Dashboard',
     currentlyServing: 'Currently Serving',
@@ -132,8 +141,7 @@ export const translations = {
     highPriorityCases: 'High Priority',
     avgWaitTime: 'Avg. Wait Time',
     noCurrentPatient: 'No patient currently being served',
-    noWaitingPatients: 'No patients waiting',
-    
+
     // Admin Dashboard
     adminDashboard: 'Admin Dashboard',
     userManagement: 'User Management',
@@ -143,19 +151,21 @@ export const translations = {
     activeQueues: 'Active Queues',
     totalUsers: 'Total Users',
     todayVisits: 'Today\'s Visits',
-    
+    syncError: 'Failed to sync with server',
+    systemAdmin: 'System Administration',
+
     // Lab Dashboard
     labDashboard: 'Lab Technician Dashboard',
     labQueue: 'Laboratory Queue',
     pendingTests: 'Pending Tests',
     completedTests: 'Completed Tests',
-    
+
     // Patient Dashboard
     patientDashboard: 'Patient Dashboard',
     myQueues: 'My Queues',
     queueHistory: 'Queue History',
     myProfile: 'My Profile',
-    
+
     // Messages
     loginSuccess: 'Login successful',
     loginError: 'Invalid email or password',
@@ -165,14 +175,43 @@ export const translations = {
     patientCalled: 'Next patient has been called',
     patientCompleted: 'Patient consultation completed',
     networkError: 'Network error. Please try again.',
-    
+
     // Time
     minutes: 'minutes',
     hours: 'hours',
     justNow: 'Just now',
     ago: 'ago',
+
+    // Forms & Validation
+    required: 'Required',
+    invalidEmail: 'Invalid email address',
+    invalidPhone: 'Invalid Ethiopian phone (+2519xxxxxxxx)',
+    passwordLength: 'Password must be at least 6 characters',
+    passwordMismatch: "Passwords don't match",
+    termsAgreement: 'You must agree to the terms',
+    termsLabel: 'I agree to the Terms of Service and Privacy Policy',
+
+    // Register Page
+    registerAccount: 'Register New Account',
+    createAccount: 'Create Account',
+    joinMessage: 'Join Black Lion Hospital Queue Management System',
+    backToLogin: 'Back to Login',
+    registrationSuccessful: 'Registration Successful',
+    registrationFailed: 'Registration Failed',
+    registrationWelcome: 'Welcome! Your patient records have been created. Please login.',
+    somethingWentWrong: 'Something went wrong. Please try again.',
+
+    // Check-in Page
+    testCardsMessage: 'Test cards: CARD-001 to CARD-005',
+    getAnotherTicket: 'Get Another Ticket',
+    selectDeptRequired: 'Please select a department',
+    selectServiceRequired: 'Please select a service type',
+
+    // Login Page
+    quickAccess: 'Quick access for development testing',
+    createOneHere: 'Create one here',
   },
-  
+
   am: {
     // Common - Amharic (placeholder translations)
     appName: 'ጥቁር አንበሳ ሆስፒታል',
@@ -194,7 +233,7 @@ export const translations = {
     login: 'ግባ',
     register: 'ተመዝገብ',
     refresh: 'አድስ',
-    
+
     // Navigation
     home: 'መነሻ',
     dashboard: 'ዳሽቦርድ',
@@ -206,7 +245,7 @@ export const translations = {
     settings: 'ቅንብሮች',
     notifications: 'ማስታወቂያዎች',
     reports: 'ሪፖርቶች',
-    
+
     // Auth
     email: 'ኢሜይል',
     password: 'የይለፍ ቃል',
@@ -217,13 +256,13 @@ export const translations = {
     loginAs: 'እንደ ግባ',
     welcomeBack: 'እንኳን ደህና መጡ',
     loginDescription: 'መለያዎን ለመድረስ መረጃዎን ያስገቡ',
-    
+
     // Roles
     patient: 'ታካሚ',
     doctor: 'ሐኪም',
     labTechnician: 'የላብ ቴክኒሻን',
     admin: 'አስተዳዳሪ',
-    
+
     // Queue
     queueNumber: 'የወረፋ ቁጥር',
     department: 'ክፍል',
@@ -240,13 +279,13 @@ export const translations = {
     cancelled: 'ተሰርዟል',
     callNext: 'ቀጣዩን ጥራ',
     completePatient: 'ጨርስ',
-    
+
     // Priority
     urgent: 'አስቸኳይ',
     high: 'ከፍተኛ',
     medium: 'መካከለኛ',
     low: 'ዝቅተኛ',
-    
+
     // Departments
     cardiology: 'የልብ ክፍል',
     laboratory: 'ላቦራቶሪ',
@@ -256,7 +295,7 @@ export const translations = {
     generalMedicine: 'ጠቅላላ ህክምና',
     orthopedics: 'ኦርቶፔዲክስ',
     pediatrics: 'የህፃናት',
-    
+
     // Service Types
     generalConsultation: 'ጠቅላላ ምክክር',
     specialist: 'ስፔሻሊስት',
@@ -264,7 +303,7 @@ export const translations = {
     imaging: 'ምስል',
     medicationPickup: 'መድሃኒት ማንሳት',
     emergencyService: 'የድንገተኛ አገልግሎት',
-    
+
     // Check-in
     checkInTitle: 'የታካሚ ቼክ-ኢን',
     checkInDescription: 'የወረፋ ቁጥር ለማግኘት መረጃዎን ያስገቡ',
@@ -277,7 +316,7 @@ export const translations = {
     yourQueueNumber: 'የእርስዎ ወረፋ ቁጥር',
     pleaseWait: 'እባክዎ ቁጥርዎ እስኪጠራ ይጠብቁ',
     printTicket: 'ትኬት ያትሙ',
-    
+
     // Landing
     welcomeTitle: 'ወደ ጥቁር አንበሳ ሆስፒታል እንኳን ደህና መጡ',
     welcomeSubtitle: 'ዲጂታል ወረፋ አስተዳደር ስርዓት',
@@ -285,13 +324,22 @@ export const translations = {
     searchPlaceholder: 'የወረፋ ቁጥር ወይም ስልክ ያስገቡ',
     searchButton: 'ፈልግ',
     getNewTicket: 'አዲስ ትኬት ያግኙ',
-    
+
     // Display
     displayTitle: 'ወረፋ ማሳያ',
     refreshing: 'በማደስ ላይ...',
     lastUpdated: 'የመጨረሻ ማሻሻያ',
-    noPatients: 'ምንም ታካሚ አይጠብቅም',
-    
+    noWaitingPatients: 'ምንም ታካሚ አይጠብቅም',
+    fetchError: 'የእውነተኛ ጊዜ ወረፋ መረጃ ማምጣት አልተቻለም',
+    publicDisplayTitle: 'የወረፋ ማሳያ ቦርድ | ጥቁር አንበሳ',
+    medicalQueueStatus: 'የህክምና ወረፋ ሁኔታ',
+    current: 'ወቅታዊ',
+    standby: 'ተጠባባቂ',
+    waitingList: 'የተጠባባቂዎች ዝርዝር',
+    sectionClear: 'ክፍሉ ነፃ ነው',
+    bulletin: 'ማስታወቂያ',
+    patientsCount: 'ታካሚዎች',
+
     // Doctor Dashboard
     doctorDashboard: 'የሐኪም ዳሽቦርድ',
     currentlyServing: 'አሁን እየተገለገለ ያለ',
@@ -302,8 +350,7 @@ export const translations = {
     highPriorityCases: 'ከፍተኛ ቅድሚያ',
     avgWaitTime: 'አማካይ የመጠበቅ ጊዜ',
     noCurrentPatient: 'አሁን የሚገለገል ታካሚ የለም',
-    noWaitingPatients: 'ምንም ታካሚ አይጠብቅም',
-    
+
     // Admin Dashboard
     adminDashboard: 'የአስተዳዳሪ ዳሽቦርድ',
     userManagement: 'የተጠቃሚ አስተዳደር',
@@ -313,19 +360,21 @@ export const translations = {
     activeQueues: 'ንቁ ወረፋዎች',
     totalUsers: 'ጠቅላላ ተጠቃሚዎች',
     todayVisits: 'የዛሬ ጎብኝዎች',
-    
+    syncError: 'ከአገልጋይ ጋር ማመሳሰል አልተቻለም',
+    systemAdmin: 'የስርዓት አስተዳደር',
+
     // Lab Dashboard
     labDashboard: 'የላብ ቴክኒሻን ዳሽቦርድ',
     labQueue: 'የላቦራቶሪ ወረፋ',
     pendingTests: 'በመጠበቅ ላይ ያሉ ምርመራዎች',
     completedTests: 'የተጠናቀቁ ምርመራዎች',
-    
+
     // Patient Dashboard
     patientDashboard: 'የታካሚ ዳሽቦርድ',
     myQueues: 'የእኔ ወረፋዎች',
     queueHistory: 'የወረፋ ታሪክ',
     myProfile: 'የእኔ መገለጫ',
-    
+
     // Messages
     loginSuccess: 'መግቢያ ተሳክቷል',
     loginError: 'የተሳሳተ ኢሜይል ወይም የይለፍ ቃል',
@@ -335,12 +384,41 @@ export const translations = {
     patientCalled: 'ቀጣዩ ታካሚ ተጠርቷል',
     patientCompleted: 'የታካሚ ምክክር ተጠናቅቋል',
     networkError: 'የአውታር ስህተት። እባክዎ ዳግም ይሞክሩ።',
-    
+
     // Time
     minutes: 'ደቂቃዎች',
     hours: 'ሰዓቶች',
     justNow: 'አሁኑኑ',
     ago: 'በፊት',
+
+    // Forms & Validation
+    required: 'አስፈላጊ',
+    invalidEmail: 'የተሳሳተ ኢሜይል አድራሻ',
+    invalidPhone: 'የተሳሳተ ስልክ ቁጥር (+2519xxxxxxxx)',
+    passwordLength: 'የይለፍ ቃል ቢያንስ 6 ሆሄያት መሆን አለበት',
+    passwordMismatch: 'የይለፍ ቃሎች አይcocም',
+    termsAgreement: 'በደንብና ግዴታዎች መስማማት አለብዎት',
+    termsLabel: 'በአገልግሎት ውሎች እና ግላዊነት ፖሊሲ እስማማለሁ',
+
+    // Register Page
+    registerAccount: 'አዲስ መለያ ይመዝገቡ',
+    createAccount: 'መለያ ይፍጠሩ',
+    joinMessage: 'የጥቁር አንበሳ ሆስፒታል ወረፋ አስተዳደር ስርዓትን ይቀላቀሉ',
+    backToLogin: 'ወደ መግቢያ ተመለስ',
+    registrationSuccessful: 'ምዝገባ ተሳክቷል',
+    registrationFailed: 'ምዝገባ አልተሳካም',
+    registrationWelcome: 'እንኳን ደህና መጡ! የታካሚ መዝገብዎ ተፈጥሯል፡፡ እባክዎ ይግቡ፡፡',
+    somethingWentWrong: 'ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።',
+
+    // Check-in Page
+    testCardsMessage: 'የሙከራ ካርዶች: CARD-001 እስከ CARD-005',
+    getAnotherTicket: 'ሌላ ትኬት ያግኙ',
+    selectDeptRequired: 'እባክዎ ክፍል ይምረጡ',
+    selectServiceRequired: 'እባክዎ የአገልግሎት ዓይነት ይምረጡ',
+
+    // Login Page
+    quickAccess: 'ለሙከራ ፈጣን መግቢያ',
+    createOneHere: 'እዚህ ይፍጠሩ',
   },
 } as const;
 

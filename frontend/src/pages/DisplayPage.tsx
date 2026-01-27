@@ -1,20 +1,22 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { DepartmentDisplay, queueApi } from '@/lib/api';
-import { useSocket } from '@/contexts/SocketContext';
-import meSpeak from 'mespeak';
-import { 
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { DepartmentDisplay, queueApi } from "@/lib/api";
+import { useSocket } from "@/contexts/SocketContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { announcePatient as audixaAnnounce } from "@/lib/audixa";
+import {
   Clock,
-  Volume2, 
-  VolumeX, 
-  Maximize, 
+  Volume2,
+  VolumeX,
+  Maximize,
   Minimize,
   Activity,
-  Users
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
+  Users,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 
 export default function DisplayPage() {
+  const { t } = useLanguage();
   const { socket } = useSocket();
   const [departments, setDepartments] = useState<DepartmentDisplay[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -26,34 +28,21 @@ export default function DisplayPage() {
 
   // Set document title
   useEffect(() => {
-    document.title = 'Public Display Board | Black Lion DQMS';
+    document.title = t("publicDisplayTitle");
   }, []);
 
-  // Initialize meSpeak.js for industrial consistency
-  useEffect(() => {
-    try {
-      meSpeak.loadConfig('/mespeak/config.json');
-      meSpeak.loadVoice('/mespeak/en-us.json');
-      console.log('[TTS] meSpeak engine ready');
-    } catch (error) {
-      console.error('[TTS] meSpeak initialization failed', error);
-    }
-  }, []);
+  // Voice Announcement Function (Audixa)
+  const announcePatient = useCallback(
+    async (queueNumber: string, department: string) => {
+      if (!soundEnabled) return;
 
-  // Voice Announcement Function (meSpeak)
-  const announcePatient = useCallback((queueNumber: string, department: string) => {
-    if (!soundEnabled || !meSpeak.isVoiceLoaded()) return;
-    
-    // Industrial drone-style announcement
-    const text = `Queue number ${queueNumber.split('').join(' ')}, please proceed to ${department}`;
-    
-    meSpeak.speak(text, {
-      speed: 155, // Slightly slower for better clarity
-      pitch: 65,  // Higher pitch for female voice
-      variant: 'f2', // Specifically select a female variant
-      wordgap: 1
-    });
-  }, [soundEnabled]);
+      console.log(
+        `[TTS] Requesting announcement for ${queueNumber} via Audixa`,
+      );
+      await audixaAnnounce(queueNumber, department);
+    },
+    [soundEnabled],
+  );
 
   const fetchDisplayData = useCallback(async () => {
     setIsRefreshing(true);
@@ -61,12 +50,12 @@ export default function DisplayPage() {
       const response = await queueApi.getDisplay();
       if (response.data.success) {
         const newDepartments = response.data.data.departments;
-        
+
         // Check for changes and trigger voice/highlight
         newDepartments.forEach((dept: DepartmentDisplay) => {
           const currentServing = dept.currentlyServing?.queueNumber;
           const prevServing = previousServingRef.current.get(dept.department);
-          
+
           if (currentServing && currentServing !== prevServing) {
             setHighlightedQueue(currentServing);
             announcePatient(currentServing, dept.department);
@@ -74,11 +63,11 @@ export default function DisplayPage() {
             previousServingRef.current.set(dept.department, currentServing);
           }
         });
-        
+
         setDepartments(newDepartments);
       }
     } catch (error) {
-      console.error('Failed to fetch display data:', error);
+      console.error("Failed to fetch display data:", error);
     } finally {
       setLastUpdated(new Date());
       setIsRefreshing(false);
@@ -89,18 +78,18 @@ export default function DisplayPage() {
   useEffect(() => {
     if (socket) {
       const handleUpdate = (payload: any) => {
-        console.log('[SOCKET] Update received:', payload);
+        console.log("[SOCKET] Update received:", payload);
         fetchDisplayData();
       };
 
-      socket.on('display:updated', handleUpdate);
-      socket.on('queue:updated', handleUpdate);
-      socket.on('patient:called', handleUpdate);
+      socket.on("display:updated", handleUpdate);
+      socket.on("queue:updated", handleUpdate);
+      socket.on("patient:called", handleUpdate);
 
       return () => {
-        socket.off('display:updated', handleUpdate);
-        socket.off('queue:updated', handleUpdate);
-        socket.off('patient:called', handleUpdate);
+        socket.off("display:updated", handleUpdate);
+        socket.off("queue:updated", handleUpdate);
+        socket.off("patient:called", handleUpdate);
       };
     }
   }, [socket, fetchDisplayData]);
@@ -121,35 +110,44 @@ export default function DisplayPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#1e293b] flex flex-col font-sans selection:bg-primary/10">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/10">
       {/* Professional Hospital Header */}
-      <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 relative z-20 shadow-sm shrink-0">
+      <header className="h-12 bg-card border-b border-border flex items-center justify-between px-3 relative z-20 shadow-sm shrink-0">
         <div className="flex items-center gap-4">
-          <div className="bg-white p-1 rounded-sm border border-gray-100 shadow-sm">
-            <img src="/logo.png" alt="Black Lion" className="h-6 object-contain" />
+          <div className="bg-card p-0.5 border border-border shadow-sm">
+            <img
+              src="/logo.png"
+              alt="Black Lion"
+              className="h-6 object-contain"
+            />
           </div>
-          <div className="h-5 w-[1px] bg-gray-200 mx-1" />
+          <div className="h-5 w-[1px] bg-border mx-1" />
           <div>
-            <h1 className="text-base font-black tracking-tighter uppercase italic text-[#0f172a] flex items-center gap-2">
-              Black Lion <span className="text-primary">Medical Queue Status</span>
+            <h1 className="text-base font-black tracking-tighter uppercase italic text-foreground flex items-center gap-2">
+              {t("appName")}{" "}
+              <span className="text-primary">{t("medicalQueueStatus")}</span>
             </h1>
           </div>
         </div>
 
         <div className="flex items-center gap-6">
-          <div className="text-right border-l border-gray-100 pl-6">
-            <p className="text-[14px] font-black font-mono tracking-tighter text-[#0f172a] leading-none">
-              {format(lastUpdated, 'HH:mm:ss')}
+          <div className="text-right border-l border-border pl-6">
+            <p className="text-[14px] font-black font-mono tracking-tighter text-foreground leading-none">
+              {format(lastUpdated, "HH:mm:ss")}
             </p>
           </div>
           <div className="flex gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-none hover:bg-gray-50 text-gray-400 hover:text-primary transition-colors"
+              className="h-7 w-7 hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
               onClick={() => setSoundEnabled(!soundEnabled)}
             >
-              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              {soundEnabled ? (
+                <Volume2 className="h-4 w-4" />
+              ) : (
+                <VolumeX className="h-4 w-4" />
+              )}
             </Button>
             <Button
               variant="ghost"
@@ -157,43 +155,59 @@ export default function DisplayPage() {
               className="h-7 w-7 rounded-none hover:bg-gray-50 text-gray-400 hover:text-primary transition-colors"
               onClick={toggleFullscreen}
             >
-              {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+              {isFullscreen ? (
+                <Minimize className="h-4 w-4" />
+              ) : (
+                <Maximize className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Grid - Hospital Industrial Style */}
-      <main className="flex-1 p-[1px] relative z-10 bg-gray-300 overflow-y-auto lg:overflow-hidden">
+      <main className="flex-1 p-[1px] relative z-10 bg-border overflow-y-auto lg:overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[1px] h-full">
           {departments.map((dept: DepartmentDisplay) => (
-            <div 
-              key={dept.department} 
-              className={`bg-white overflow-hidden flex flex-col transition-all duration-500 relative min-h-[400px] lg:min-h-0 ${
-                highlightedQueue === dept.currentlyServing?.queueNumber 
-                ? 'z-30 ring-inset ring-4 ring-primary shadow-2xl' 
-                : 'shadow-sm'
+            <div
+              key={dept.department}
+              className={`bg-card overflow-hidden flex flex-col transition-all duration-500 relative min-h-[400px] lg:min-h-0 ${
+                highlightedQueue === dept.currentlyServing?.queueNumber
+                  ? "z-30 ring-inset ring-4 ring-primary shadow-2xl"
+                  : "shadow-sm"
               }`}
             >
               {/* Dept Header */}
-              <div className={`px-4 py-3 flex items-center justify-between border-b border-gray-100 ${
-                 highlightedQueue === dept.currentlyServing?.queueNumber ? 'bg-primary text-white font-black' : 'bg-gray-50 text-[#334155]'
-              }`}>
+              <div
+                className={`px-2 py-1.5 flex items-center justify-between border-b border-border ${
+                  highlightedQueue === dept.currentlyServing?.queueNumber
+                    ? "bg-primary text-white font-black"
+                    : "bg-muted text-foreground"
+                }`}
+              >
                 <h3 className="font-black text-sm md:text-base tracking-widest uppercase truncate">
                   {dept.department}
                 </h3>
-                <Activity className={`h-3 w-3 opacity-60 ${highlightedQueue === dept.currentlyServing?.queueNumber ? 'animate-pulse' : ''}`} />
+                <Activity
+                  className={`h-3 w-3 opacity-60 ${highlightedQueue === dept.currentlyServing?.queueNumber ? "animate-pulse" : ""}`}
+                />
               </div>
 
               {/* Now Serving - One Line Compact Focus */}
-              <div className={`px-4 py-4 border-b border-gray-100 transition-colors ${
-                highlightedQueue === dept.currentlyServing?.queueNumber ? 'bg-primary/5' : 'bg-white'
-              }`}>
+              <div
+                className={`px-2 py-2 border-b border-border transition-colors ${
+                  highlightedQueue === dept.currentlyServing?.queueNumber
+                    ? "bg-primary/5"
+                    : "bg-card"
+                }`}
+              >
                 {dept.currentlyServing ? (
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Current</p>
-                      <p className="text-3xl font-black text-[#0f172a] tracking-tighter leading-none mt-1">
+                      <p className="text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">
+                        {t("current")}
+                      </p>
+                      <p className="text-3xl font-black text-foreground tracking-tighter leading-none mt-1">
                         {dept.currentlyServing.queueNumber}
                       </p>
                     </div>
@@ -205,48 +219,59 @@ export default function DisplayPage() {
                   </div>
                 ) : (
                   <div className="flex items-center justify-between opacity-20">
-                     <p className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase italic">Standby</p>
-                     <Clock className="h-5 w-5 text-gray-400" />
+                    <p className="text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase italic">
+                      {t("standby")}
+                    </p>
+                    <Clock className="h-5 w-5 text-muted-foreground" />
                   </div>
                 )}
               </div>
 
               {/* Waiting List - Maximized Height */}
-              <div className="flex-1 flex flex-col bg-gray-50/30 min-h-0">
-                <div className="px-4 py-2 flex items-center justify-between bg-gray-100/30 border-b border-gray-100">
-                  <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Waiting List</span>
-                  <span className="text-[10px] text-primary font-black uppercase tracking-widest">
-                    {dept.statistics.totalWaiting} Patients
+              <div className="flex-1 flex flex-col bg-muted/30 min-h-0">
+                <div className="px-2 py-1 flex items-center justify-between bg-muted/30 border-b border-border">
+                  <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
+                    {t("waitingList")}
+                  </span>
+                  <span className="text-[10px] text-primary font-black uppercase tracking-widest font-mono">
+                    {String(dept.statistics.totalWaiting).padStart(4, "0")}{" "}
+                    {t("patientsCount")}
                   </span>
                 </div>
-                
-                <div className="flex-1 overflow-y-auto scrollbar-hide bg-white/50">
+
+                <div className="flex-1 overflow-y-auto scrollbar-hide bg-card/50">
                   {dept.waitingPatients.length > 0 ? (
                     dept.waitingPatients.map((patient: any) => (
-                      <div 
+                      <div
                         key={patient.queueNumber}
-                        className="group flex items-center justify-between border-b border-gray-50 px-4 py-3 hover:bg-gray-50 transition-colors"
+                        className="group flex items-center justify-between border-b border-border px-2 py-1.5 hover:bg-muted transition-colors"
                       >
                         <div className="flex items-center gap-4">
-                          <span className="text-xl font-black text-[#334155] group-hover:text-primary transition-colors">
+                          <span className="text-xl font-black text-foreground group-hover:text-primary transition-colors">
                             {patient.queueNumber}
                           </span>
                           <span className="text-xs font-bold text-[#94a3b8] uppercase truncate max-w-[150px]">
                             {patient.patientName}
                           </span>
                         </div>
-                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-sm border ${
-                          patient.priority === 'Urgent' ? 'bg-red-50 text-red-500 border-red-100' :
-                          patient.priority === 'High' ? 'bg-orange-50 text-orange-500 border-orange-100' :
-                          'bg-blue-50 text-primary border-blue-100'
-                        }`}>
+                        <span
+                          className={`text-[9px] font-black px-1.5 py-0.5 border ${
+                            patient.priority === "Urgent"
+                              ? "bg-red-50 text-red-500 border-red-100"
+                              : patient.priority === "High"
+                                ? "bg-orange-50 text-orange-500 border-orange-100"
+                                : "bg-blue-50 text-primary border-blue-100"
+                          }`}
+                        >
                           {patient.priority.toUpperCase()}
                         </span>
                       </div>
                     ))
                   ) : (
                     <div className="flex-1 flex items-center justify-center py-6 opacity-20">
-                      <p className="text-[10px] uppercase font-black tracking-widest italic text-gray-400">Section Clear</p>
+                      <p className="text-[10px] uppercase font-black tracking-widest italic text-muted-foreground">
+                        {t("sectionClear")}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -260,7 +285,9 @@ export default function DisplayPage() {
       <footer className="h-10 bg-primary flex items-center overflow-hidden whitespace-nowrap border-t border-white/10 relative z-20 shrink-0">
         <div className="flex items-center gap-3 bg-black/40 h-full px-5 relative z-10 border-r border-white/10">
           <Activity className="h-3.5 w-3.5 animate-spin-slow text-white" />
-          <span className="text-[10px] font-black tracking-[0.2em] uppercase text-white">Bulletin</span>
+          <span className="text-[10px] font-black tracking-[0.2em] uppercase text-white">
+            {t("bulletin")}
+          </span>
         </div>
         <div className="flex animate-marquee items-center gap-12 text-sm font-bold uppercase tracking-widest text-white">
           {departments.map((dept: DepartmentDisplay) => (
@@ -268,18 +295,21 @@ export default function DisplayPage() {
               <span>{dept.department}</span>
               <span className="flex items-center gap-1 font-mono">
                 <Users className="h-3 w-3 text-white/70" />
-                {dept.statistics.totalWaiting}
+                {String(dept.statistics.totalWaiting).padStart(4, "0")}
               </span>
               <div className="h-4 w-[1px] bg-white/20" />
             </div>
           ))}
           {/* Duplicate for infinite effect */}
           {departments.map((dept: DepartmentDisplay) => (
-            <div key={`${dept.department}-dup`} className="flex items-center gap-4">
+            <div
+              key={`${dept.department}-dup`}
+              className="flex items-center gap-4"
+            >
               <span>{dept.department}</span>
               <span className="flex items-center gap-1 font-mono">
                 <Users className="h-3 w-3 text-white/70" />
-                {dept.statistics.totalWaiting}
+                {String(dept.statistics.totalWaiting).padStart(4, "0")}
               </span>
               <div className="h-4 w-[1px] bg-white/20" />
             </div>

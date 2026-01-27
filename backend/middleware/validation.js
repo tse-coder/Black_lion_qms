@@ -46,17 +46,7 @@ const userRegistrationSchema = Joi.object({
     'string.pattern.base': 'Phone number must be in Ethiopian format (+2519xxxxxxxx)',
     'any.required': 'Phone number is required',
   }),
-  // Patient fields (required if role is Patient)
-  cardNumber: Joi.string().when('role', {
-    is: 'Patient',
-    then: Joi.required(),
-    otherwise: Joi.optional()
-  }),
-  medicalRecordNumber: Joi.string().when('role', {
-    is: 'Patient',
-    then: Joi.required(),
-    otherwise: Joi.optional()
-  }),
+  // Patient fields (automatically generated on backend)
   dateOfBirth: Joi.date().iso().when('role', {
     is: 'Patient',
     then: Joi.required(),

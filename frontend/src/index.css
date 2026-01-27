@@ -1,5 +1,5 @@
 /* Amharic Font Support */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,42 +13,42 @@
     /* Primary Medical Blue */
     --primary: 210 100% 33%;
     --primary-foreground: 0 0% 100%;
-    
+
     /* Background & Surface */
     --background: 210 20% 98%;
     --foreground: 215 25% 15%;
-    
+
     /* Card & Container */
     --card: 0 0% 100%;
     --card-foreground: 215 25% 15%;
-    
+
     /* Popover */
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
-    
+
     /* Secondary */
     --secondary: 210 15% 93%;
     --secondary-foreground: 215 25% 20%;
-    
+
     /* Muted */
     --muted: 210 15% 93%;
     --muted-foreground: 215 15% 45%;
-    
+
     /* Accent */
     --accent: 210 100% 95%;
     --accent-foreground: 210 100% 33%;
-    
+
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    
+
     /* Border & Input */
     --border: 210 20% 88%;
     --input: 210 20% 88%;
     --ring: 210 100% 33%;
-    
-    --radius: 0.5rem;
-    
+
+    --radius: 0rem;
+
     /* Priority Colors - Queue Status */
     --priority-urgent: 0 84% 50%;
     --priority-urgent-foreground: 0 0% 100%;
@@ -58,7 +58,7 @@
     --priority-medium-foreground: 0 0% 100%;
     --priority-low: 210 100% 50%;
     --priority-low-foreground: 0 0% 100%;
-    
+
     /* Status Colors */
     --status-waiting: 45 93% 47%;
     --status-waiting-foreground: 0 0% 100%;
@@ -68,7 +68,7 @@
     --status-complete-foreground: 0 0% 100%;
     --status-cancelled: 0 0% 50%;
     --status-cancelled-foreground: 0 0% 100%;
-    
+
     /* Sidebar */
     --sidebar-background: 210 25% 97%;
     --sidebar-foreground: 215 25% 25%;
@@ -81,49 +81,49 @@
   }
 
   .dark {
-    --primary: 210 100% 60%;
-    --primary-foreground: 215 25% 10%;
-    
-    --background: 215 25% 10%;
-    --foreground: 210 20% 95%;
-    
-    --card: 215 25% 13%;
-    --card-foreground: 210 20% 95%;
-    
-    --popover: 215 25% 13%;
-    --popover-foreground: 210 20% 95%;
-    
-    --secondary: 215 20% 18%;
-    --secondary-foreground: 210 20% 90%;
-    
-    --muted: 215 20% 18%;
-    --muted-foreground: 215 15% 60%;
-    
-    --accent: 210 100% 20%;
-    --accent-foreground: 210 100% 70%;
-    
+    --primary: 210 100% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 98%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 210 100% 25%;
+    --accent-foreground: 210 100% 80%;
+
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
-    
-    --border: 215 20% 20%;
-    --input: 215 20% 20%;
-    --ring: 210 100% 60%;
-    
+
+    --border: 217 33% 22%;
+    --input: 217 33% 22%;
+    --ring: 210 100% 65%;
+
     /* Priority Colors - Dark Mode */
-    --priority-urgent: 0 84% 55%;
-    --priority-high: 25 95% 58%;
-    --priority-medium: 142 71% 50%;
-    --priority-low: 210 100% 55%;
-    
+    --priority-urgent: 0 84% 60%;
+    --priority-high: 25 95% 63%;
+    --priority-medium: 142 71% 55%;
+    --priority-low: 210 100% 60%;
+
     /* Sidebar - Dark Mode */
-    --sidebar-background: 215 25% 12%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 210 100% 60%;
-    --sidebar-primary-foreground: 215 25% 10%;
-    --sidebar-accent: 210 100% 20%;
-    --sidebar-accent-foreground: 210 100% 70%;
-    --sidebar-border: 215 20% 18%;
-    --sidebar-ring: 210 100% 60%;
+    --sidebar-background: 222 47% 13%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 100% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 100% 25%;
+    --sidebar-accent-foreground: 210 100% 80%;
+    --sidebar-border: 217 33% 22%;
+    --sidebar-ring: 210 100% 65%;
   }
 }
 
@@ -134,17 +134,23 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
   }
-  
+
   /* Large touch targets for accessibility */
-  button, 
+  button,
   [role="button"],
   a {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* High contrast focus indicators */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-primary;
@@ -156,64 +162,68 @@
   .priority-urgent {
     @apply bg-[hsl(var(--priority-urgent))] text-[hsl(var(--priority-urgent-foreground))];
   }
-  
+
   .priority-high {
     @apply bg-[hsl(var(--priority-high))] text-[hsl(var(--priority-high-foreground))];
   }
-  
+
   .priority-medium {
     @apply bg-[hsl(var(--priority-medium))] text-[hsl(var(--priority-medium-foreground))];
   }
-  
+
   .priority-low {
     @apply bg-[hsl(var(--priority-low))] text-[hsl(var(--priority-low-foreground))];
   }
-  
+
   /* Status Badge Styles */
   .status-waiting {
     @apply bg-[hsl(var(--status-waiting))] text-[hsl(var(--status-waiting-foreground))];
   }
-  
+
   .status-in-progress {
     @apply bg-[hsl(var(--status-in-progress))] text-[hsl(var(--status-in-progress-foreground))];
   }
-  
+
   .status-complete {
     @apply bg-[hsl(var(--status-complete))] text-[hsl(var(--status-complete-foreground))];
   }
-  
+
   .status-cancelled {
     @apply bg-[hsl(var(--status-cancelled))] text-[hsl(var(--status-cancelled-foreground))];
   }
-  
+
   /* Display Board Animations */
   @keyframes pulse-highlight {
-    0%, 100% { 
+    0%,
+    100% {
       background-color: hsl(var(--accent));
     }
-    50% { 
+    50% {
       background-color: hsl(var(--primary) / 0.2);
     }
   }
-  
+
   .queue-highlight {
     animation: pulse-highlight 1s ease-in-out 3;
   }
-  
+
   /* Ticket Styling */
   .ticket-container {
     @apply relative overflow-hidden;
-    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--accent)) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--accent)) 100%
+    );
   }
-  
+
   .ticket-container::before {
-    content: '';
+    content: "";
     @apply absolute inset-0 opacity-5;
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 }
 
-
 .font-amharic {
-  font-family: 'Noto Sans Ethiopic', sans-serif;
+  font-family: "Noto Sans Ethiopic", sans-serif;
 }

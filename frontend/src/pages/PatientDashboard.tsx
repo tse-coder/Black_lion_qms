@@ -20,51 +20,7 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 
-// Mock patient data
-const MOCK_PATIENT_QUEUES: Queue[] = [
-  {
-    id: '1',
-    queueNumber: 'CARD-001',
-    status: 'Waiting',
-    serviceType: 'General Consultation',
-    department: 'Cardiology',
-    priority: 'Medium',
-    joinedAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
-    estimatedWaitTime: 15,
-  },
-];
 
-const MOCK_QUEUE_HISTORY: Queue[] = [
-  {
-    id: '2',
-    queueNumber: 'LAB-099',
-    status: 'Complete',
-    serviceType: 'Laboratory',
-    department: 'Laboratory',
-    priority: 'Low',
-    joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    serviceEndTime: new Date(Date.now() - 1000 * 60 * 60 * 23).toISOString(),
-  },
-  {
-    id: '3',
-    queueNumber: 'PHR-042',
-    status: 'Complete',
-    serviceType: 'Pharmacy',
-    department: 'Pharmacy',
-    priority: 'Medium',
-    joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    serviceEndTime: new Date(Date.now() - 1000 * 60 * 60 * 47).toISOString(),
-  },
-  {
-    id: '4',
-    queueNumber: 'EMR-015',
-    status: 'Cancelled',
-    serviceType: 'Emergency',
-    department: 'Emergency',
-    priority: 'High',
-    joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-  },
-];
 
 export default function PatientDashboard() {
   const { t } = useLanguage();
@@ -175,7 +131,6 @@ export default function PatientDashboard() {
                   <QueueStatusCard
                     key={queue.id}
                     queue={queue}
-                    position={3}
                     estimatedWaitTime={queue.estimatedWaitTime}
                   />
                 ))

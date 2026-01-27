@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
 // API Base URL
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -154,17 +154,17 @@ export interface ApiError {
 export const authApi = {
   login: (email: string, password: string) =>
     api.post<ApiResponse<{ user: User; token: string; expiresIn: string }>>('/auth/login', { email, password }),
-  
+
   register: (data: any) => api.post<ApiResponse<{ user: User }>>('/auth/register', data),
-  
+
   updateProfile: (data: any) => api.put<ApiResponse<{ user: User }>>('/auth/profile', data),
-  
+
   changePassword: (data: any) => api.put<ApiResponse<any>>('/auth/change-password', data),
-  
+
   getMe: () => api.get<ApiResponse<{ user: User }>>('/auth/me'),
-  
+
   logout: () => api.post<ApiResponse<null>>('/auth/logout'),
-  
+
   createPatientProfile: (data: {
     cardNumber: string;
     medicalRecordNumber: string;
@@ -193,7 +193,7 @@ export const queueApi = {
     estimatedWaitTime: number;
     smsSent: boolean;
   }>>('/queues/request', data),
-  
+
   getStatus: (queueNumber: string) =>
     api.get<ApiResponse<{
       queue: Queue;
@@ -202,7 +202,7 @@ export const queueApi = {
       estimatedWaitTime: number;
       departmentStatus: { waitingCount: number; inProgressCount: number; totalActive: number };
     }>>(`/queues/status/${queueNumber}`),
-  
+
   searchByPhone: (phoneNumber: string) =>
     api.get<ApiResponse<{
       patient: { name: string; phoneNumber: string };
@@ -210,7 +210,7 @@ export const queueApi = {
       completedQueues: Queue[];
       totalQueues: number;
     }>>('/api/queue/search-by-phone', { params: { phoneNumber } }),
-  
+
   // Public display
   getDisplay: () =>
     api.get<ApiResponse<{
@@ -218,7 +218,7 @@ export const queueApi = {
       timestamp: string;
       totalDepartments: number;
     }>>('/api/queue/display'),
-  
+
   search: (queueNumber: string) =>
     api.get<ApiResponse<{
       queue: Queue;
@@ -228,10 +228,10 @@ export const queueApi = {
       departmentStatus: { waitingCount: number; inProgressCount: number; totalActive: number };
       lastUpdated: string;
     }>>(`/api/queue/search/${queueNumber}`),
-  
+
   // Authenticated endpoints
   getQueues: () => api.get<ApiResponse<{ queues: Queue[] }>>('/queues'),
-  
+
   createQueue: (data: {
     patientId: string;
     serviceType: ServiceType;
@@ -239,13 +239,13 @@ export const queueApi = {
     priority: Priority;
     notes?: string;
   }) => api.post<ApiResponse<{ queue: Queue }>>('/queues', data),
-  
+
   updateStatus: (id: string, data: { status: QueueStatus; notes?: string }) =>
     api.put<ApiResponse<{ queue: Queue }>>(`/queues/${id}/status`, data),
-  
+
   callNext: (queueId: string) =>
     api.put<ApiResponse<{ previousQueue?: Queue; nextQueue: Queue }>>(`/queues/${queueId}/next`),
-  
+
   // Doctor-specific endpoints
   getActive: (department?: string) =>
     api.get<ApiResponse<{
@@ -260,7 +260,7 @@ export const queueApi = {
       };
       doctorId: string;
     }>>('/api/queue/active', { params: { department } }),
-  
+
   doctorCallNext: (department: string) =>
     api.patch<ApiResponse<{
       calledPatient: Queue;
@@ -268,7 +268,7 @@ export const queueApi = {
       doctorId: string;
       smsSent: boolean;
     }>>('/api/queue/call-next', { department }),
-  
+
   complete: (notes?: string) =>
     api.patch<ApiResponse<{
       completedPatient: Queue;
@@ -276,7 +276,7 @@ export const queueApi = {
       doctorId: string;
       smsSent: boolean;
     }>>('/api/queue/complete', { notes }),
-  
+
   getStatistics: (department: string, dateRange?: 'today' | 'week' | 'month') =>
     api.get<ApiResponse<{
       department: string;
@@ -303,7 +303,7 @@ export const patientApi = {
 export const notificationApi = {
   sendSms: (data: { phoneNumber: string; message: string; patientId?: string }) =>
     api.post<ApiResponse<{ phoneNumber: string; message: string; sentAt: string }>>('/notifications/sms', data),
-  
+
   getHistory: () =>
     api.get<ApiResponse<{
       notifications: Array<{
@@ -329,20 +329,20 @@ export const appointmentApi = {
     appointmentTime: string;
     notes?: string;
   }) => api.post<ApiResponse<{ appointment: any; cardNumber: string }>>('/appointments', data),
-  
+
   getAll: () => api.get<ApiResponse<{ appointments: any[] }>>('/appointments'),
 };
 
 // Admin API
 export const adminApi = {
   getStats: () => api.get<ApiResponse<{
-     totalUsers: number;
-     activeUsers: number;
-     totalQueues: number;
-     activeQueues: number;
-     departments: number;
-     todayVisits: number;
-     departmentStats: any[];
+    totalUsers: number;
+    activeUsers: number;
+    totalQueues: number;
+    activeQueues: number;
+    departments: number;
+    todayVisits: number;
+    departmentStats: any[];
   }>>('/admin/stats'),
 
   getActivityLogs: (params?: { limit?: number; offset?: number; type?: string; action?: string }) =>

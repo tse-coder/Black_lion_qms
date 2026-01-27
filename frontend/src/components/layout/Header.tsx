@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,44 +8,48 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { 
-  User, 
-  LogOut, 
-  Settings, 
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import {
+  User,
+  LogOut,
+  Settings,
   Menu,
   Globe,
   Home,
   LayoutDashboard,
   UserPlus,
-  Monitor
-} from 'lucide-react';
+  Monitor,
+  Moon,
+  Sun,
+} from "lucide-react";
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuth();
   const { t, language, toggleLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   const getDashboardRoute = () => {
-    if (!user) return '/';
+    if (!user) return "/";
     switch (user.role) {
-      case 'Admin':
-        return '/admin';
-      case 'Doctor':
-        return '/doctor';
-      case 'Lab Technician':
-        return '/lab';
-      case 'Patient':
-        return '/patient';
+      case "Admin":
+        return "/admin";
+      case "Doctor":
+        return "/doctor";
+      case "Lab Technician":
+        return "/lab";
+      case "Patient":
+        return "/patient";
       default:
-        return '/';
+        return "/";
     }
   };
 
@@ -54,9 +58,9 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo and Title */}
         <Link to="/" className="flex items-center gap-3">
-          <img 
-            src="/logo.png" 
-            alt="Black Lion Hospital QMS" 
+          <img
+            src="/logo.png"
+            alt="Black Lion Hospital QMS"
             className="h-14 object-contain rounded-lg"
           />
         </Link>
@@ -66,26 +70,26 @@ export function Header() {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/">
               <Home className="h-4 w-4 mr-2" />
-              {t('home')}
+              {t("home")}
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link to="/check-in">
               <UserPlus className="h-4 w-4 mr-2" />
-              {t('checkIn')}
+              {t("checkIn")}
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link to="/display">
               <Monitor className="h-4 w-4 mr-2" />
-              {t('display')}
+              {t("display")}
             </Link>
           </Button>
           {isAuthenticated && (
             <Button variant="ghost" size="sm" asChild>
               <Link to={getDashboardRoute()}>
                 <LayoutDashboard className="h-4 w-4 mr-2" />
-                {t('dashboard')}
+                {t("dashboard")}
               </Link>
             </Button>
           )}
@@ -93,6 +97,20 @@ export function Header() {
 
         {/* Right side actions */}
         <div className="flex items-center gap-2">
+          {/* Theme Toggle */}
+          {/* <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="gap-2"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button> */}
+
           {/* Language Toggle */}
           <Button
             variant="outline"
@@ -101,7 +119,9 @@ export function Header() {
             className="gap-2"
           >
             <Globe className="h-4 w-4" />
-            <span className="font-medium">{language === 'en' ? 'EN' : 'አማ'}</span>
+            <span className="font-medium">
+              {language === "en" ? "EN" : "አማ"}
+            </span>
           </Button>
 
           {/* User Menu or Login */}
@@ -116,7 +136,9 @@ export function Header() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
-                    <span>{user.firstName} {user.lastName}</span>
+                    <span>
+                      {user.firstName} {user.lastName}
+                    </span>
                     <span className="text-xs font-normal text-muted-foreground">
                       {user.role}
                     </span>
@@ -126,25 +148,28 @@ export function Header() {
                 <DropdownMenuItem asChild>
                   <Link to={getDashboardRoute()}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    {t('dashboard')}
+                    {t("dashboard")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/settings">
                     <Settings className="mr-2 h-4 w-4" />
-                    {t('settings')}
+                    {t("settings")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
-                  {t('logout')}
+                  {t("logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button size="sm" asChild>
-              <Link to="/login">{t('login')}</Link>
+              <Link to="/login">{t("login")}</Link>
             </Button>
           )}
 
@@ -159,19 +184,19 @@ export function Header() {
               <DropdownMenuItem asChild>
                 <Link to="/">
                   <Home className="mr-2 h-4 w-4" />
-                  {t('home')}
+                  {t("home")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/check-in">
                   <UserPlus className="mr-2 h-4 w-4" />
-                  {t('checkIn')}
+                  {t("checkIn")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/display">
                   <Monitor className="mr-2 h-4 w-4" />
-                  {t('display')}
+                  {t("display")}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>

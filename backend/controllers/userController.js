@@ -16,9 +16,7 @@ const register = async (req, res) => {
       lastName,
       phoneNumber,
       role = 'Patient',
-      // Patient specific fields
-      cardNumber,
-      medicalRecordNumber,
+      // Patient specific fields (automated ones removed from body)
       dateOfBirth,
       gender,
       address,
@@ -62,10 +60,16 @@ const register = async (req, res) => {
 
     // If role is Patient, create patient profile
     if (role === 'Patient') {
+      // Auto-generate Card Number and MRN
+      const timestamp = Date.now();
+      const randomPart = Math.floor(1000 + Math.random() * 9000);
+      const generatedCardNumber = `CARD-${new Date().getFullYear()}-${randomPart}`;
+      const generatedMRN = `MRN-${timestamp.toString().slice(-6)}-${randomPart}`;
+
       await db.Patient.create({
         userId: user.id,
-        cardNumber,
-        medicalRecordNumber,
+        cardNumber: generatedCardNumber,
+        medicalRecordNumber: generatedMRN,
         dateOfBirth,
         gender,
         address,
