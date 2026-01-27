@@ -16,7 +16,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Create socket connection
-    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
+    const newSocket = io(import.meta.env.VITE_API_URL || 'https://black-lion-qms.onrender.com', {
       transports: ['websocket'],
       autoConnect: true,
     });
