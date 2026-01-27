@@ -1,11 +1,13 @@
+import db from '../models/index.js';
+
 // Notification Service (Mock SMS Implementation)
 // As per project rules: Methods should simulate sending an SMS by logging the message and recipient
 
 class NotificationService {
   // Send SMS notification
-  async sendSMS(phoneNumber, message) {
+  async sendSMS(phoneNumber, message, patientId = null) {
     console.log(`[SMS SENT TO ${phoneNumber}]: ${message}`);
-    
+
     // Simulate SMS gateway processing time
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -20,8 +22,23 @@ class NotificationService {
       cost: 0.50, // Mock cost in ETB
     };
 
+    // PERSIST TO DATABASE
+    try {
+      await db.Notification.create({
+        type: 'SMS',
+        recipient: phoneNumber,
+        message: message,
+        status: 'sent',
+        patientId: patientId,
+        sentAt: mockResponse.sentAt,
+        metadata: { messageId: mockResponse.messageId, cost: mockResponse.cost }
+      });
+    } catch (dbError) {
+      console.error('Failed to log notification to database:', dbError);
+    }
+
     console.log(`[SMS DELIVERY CONFIRMED] Message ID: ${mockResponse.messageId}`);
-    
+
     return {
       success: true,
       data: mockResponse,
@@ -32,35 +49,35 @@ class NotificationService {
   // Send queue notification to patient
   async sendQueueNotification(patient, queue) {
     const message = `Dear ${patient.firstName}, your queue number is ${queue.queueNumber} for ${queue.serviceType} at ${queue.department}. Current wait time: approximately ${queue.estimatedWaitTime || 15} minutes. Please be ready.`;
-    
-    return await this.sendSMS(patient.phoneNumber, message);
+
+    return await this.sendSMS(patient.phoneNumber, message, patient.id);
   }
 
   // Send "next in queue" notification
   async sendNextInQueueNotification(patient, queue) {
     const message = `Dear ${patient.firstName}, you are next in queue (${queue.queueNumber}) for ${queue.serviceType} at ${queue.department}. Please proceed to the service area immediately.`;
-    
-    return await this.sendSMS(patient.phoneNumber, message);
+
+    return await this.sendSMS(patient.phoneNumber, message, patient.id);
   }
 
   // Send queue completion notification
   async sendQueueCompletionNotification(patient, queue) {
     const message = `Dear ${patient.firstName}, your consultation for ${queue.serviceType} at ${queue.department} is complete. Thank you for visiting Black Lion Hospital.`;
-    
-    return await this.sendSMS(patient.phoneNumber, message);
+
+    return await this.sendSMS(patient.phoneNumber, message, patient.id);
   }
 
   // Send appointment reminder
   async sendAppointmentReminder(patient, appointment) {
     const message = `Reminder: You have an appointment at ${appointment.time} tomorrow (${appointment.date}) for ${appointment.department} with Dr. ${appointment.doctor}. Please arrive 15 minutes early.`;
-    
-    return await this.sendSMS(patient.phoneNumber, message);
+
+    return await this.sendSMS(patient.phoneNumber, message, patient.id);
   }
 
   // Send emergency notification
   async sendEmergencyNotification(phoneNumber, message) {
     console.log(`[EMERGENCY SMS SENT TO ${phoneNumber}]: ${message}`);
-    
+
     // Emergency messages are sent immediately
     const mockResponse = {
       success: true,
@@ -74,7 +91,7 @@ class NotificationService {
     };
 
     console.log(`[EMERGENCY SMS DELIVERY CONFIRMED] Message ID: ${mockResponse.messageId}`);
-    
+
     return {
       success: true,
       data: mockResponse,
@@ -85,7 +102,7 @@ class NotificationService {
   // Get SMS delivery status
   async getDeliveryStatus(messageId) {
     console.log(`[SMS STATUS CHECK] Checking delivery status for: ${messageId}`);
-    
+
     // Mock status check
     const mockStatus = {
       messageId: messageId,
@@ -104,7 +121,7 @@ class NotificationService {
   // Bulk SMS sending for department announcements
   async sendBulkSMS(phoneNumbers, message) {
     console.log(`[BULK SMS SENDING] Sending to ${phoneNumbers.length} recipients`);
-    
+
     const results = [];
     for (const phoneNumber of phoneNumbers) {
       const result = await this.sendSMS(phoneNumber, message);
@@ -115,7 +132,7 @@ class NotificationService {
     }
 
     console.log(`[BULK SMS COMPLETED] Sent to ${results.length} recipients`);
-    
+
     return {
       success: true,
       data: {

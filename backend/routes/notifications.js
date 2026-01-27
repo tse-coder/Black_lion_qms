@@ -1,5 +1,7 @@
 import express from 'express';
 import { authenticateToken, checkRole } from '../middleware/auth.js';
+import notificationService from '../services/notificationService.js';
+import db from '../models/index.js';
 
 const router = express.Router();
 
@@ -7,7 +9,7 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // Send SMS notification (Doctors, Lab Technicians, Admins)
-router.post('/sms', 
+router.post('/sms',
   checkRole('Doctor', 'Lab Technician', 'Admin'),
   async (req, res) => {
     try {
@@ -20,21 +22,13 @@ router.post('/sms',
         });
       }
 
-      // Mock SMS service (as per project rules)
-      console.log(`[SMS SENT TO ${phoneNumber}]: ${message}`);
-      
-      // In a real implementation, you would integrate with an SMS gateway
-      // const response = await smsService.sendSMS(phoneNumber, message);
+      // Use the service to send and log the SMS
+      const result = await notificationService.sendSMS(phoneNumber, message, patientId);
 
       res.status(200).json({
         success: true,
         message: 'SMS sent successfully',
-        data: {
-          phoneNumber,
-          message,
-          sentAt: new Date().toISOString(),
-          patientId: patientId || null,
-        },
+        data: result.data,
       });
     } catch (error) {
       console.error('Send SMS error:', error);
@@ -47,31 +41,24 @@ router.post('/sms',
 );
 
 // Get notification history (Admins)
-router.get('/history', 
+router.get('/history',
   checkRole('Admin'),
   async (req, res) => {
     try {
-      // Mock notification history
-      const notifications = [
-        {
-          id: '1',
-          type: 'SMS',
-          recipient: '+251912345678',
-          message: 'Your queue number is ready. Please proceed to the consultation room.',
-          sentAt: new Date().toISOString(),
-          status: 'sent',
-          patientId: 'patient-uuid-1',
-        },
-        {
-          id: '2',
-          type: 'SMS',
-          recipient: '+251923456789',
-          message: 'Your lab results are ready for collection.',
-          sentAt: new Date(Date.now() - 3600000).toISOString(),
-          status: 'sent',
-          patientId: 'patient-uuid-2',
-        },
-      ];
+      // Fetch real notifications from database
+      const notifications = await db.Notification.findAll({
+        limit: 50,
+        order: [['sentAt', 'DESC']],
+        include: [{
+          model: db.Patient,
+          as: 'patient',
+          include: [{
+            model: db.User,
+            as: 'user',
+            attributes: ['firstName', 'lastName']
+          }]
+        }]
+      });
 
       res.status(200).json({
         success: true,
