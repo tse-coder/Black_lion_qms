@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useToast } from '@/hooks/use-toast';
 import { QueueStatusCard } from '@/components/queue';
-import { queueApi, Queue } from '@/lib/api';
+import { queueApi, Queue, Patient } from '@/lib/api';
 import {
   User,
   Clock,
@@ -27,6 +27,7 @@ export default function PatientDashboard() {
   const { user } = useAuth();
   const [activeQueues, setActiveQueues] = useState<Queue[]>([]);
   const [queueHistory, setQueueHistory] = useState<Queue[]>([]);
+  const [patientProfile, setPatientProfile] = useState<Patient | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { socket } = useSocket();
   const { toast } = useToast();
@@ -46,8 +47,20 @@ export default function PatientDashboard() {
     setIsLoading(false);
   };
 
+  const fetchPatientProfile = async () => {
+    try {
+      const response = await queueApi.getPatientProfile();
+      if (response.data.success) {
+        setPatientProfile(response.data.data.patient);
+      }
+    } catch (error) {
+      console.error('Failed to fetch patient profile:', error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchPatientProfile();
     
     if (socket) {
       const handleQueueUpdate = () => {
@@ -106,6 +119,11 @@ export default function PatientDashboard() {
                   </h2>
                   <p className="text-muted-foreground">{user?.email}</p>
                   <p className="text-sm text-muted-foreground">{user?.phoneNumber}</p>
+                  {patientProfile?.cardNumber && (
+                    <p className="text-sm font-medium text-primary mt-1">
+                      Card Number: {patientProfile.cardNumber}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -172,7 +190,7 @@ export default function PatientDashboard() {
                           <div>
                             <p className="font-mono font-bold">{queue.queueNumber}</p>
                             <p className="text-sm text-muted-foreground">
-                              {queue.department} - {queue.serviceType}
+                              {queue.department}
                             </p>
                           </div>
                         </div>

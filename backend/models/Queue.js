@@ -22,12 +22,8 @@ const Queue = sequelize.define('Queue', {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   },
-  serviceType: {
-    type: DataTypes.ENUM('General Consultation', 'Specialist', 'Laboratory', 'Radiology', 'Pharmacy', 'Emergency'),
-    allowNull: false,
-  },
   department: {
-    type: DataTypes.STRING,
+    type: DataTypes.ENUM('Cardiology', 'Family Medicine', 'Pediatrics', 'Gynecology', 'Emergency', 'General Surgery', 'Orthopedics', 'Neurology', 'Internal Medicine'),
     allowNull: false,
   },
   doctorId: {
@@ -91,9 +87,6 @@ const Queue = sequelize.define('Queue', {
     },
     {
       fields: ['department'],
-    },
-    {
-      fields: ['serviceType'],
     },
     {
       fields: ['patientId'],

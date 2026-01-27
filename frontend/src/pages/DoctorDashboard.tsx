@@ -59,7 +59,6 @@ const MOCK_DOCTOR_DATA: ActiveQueueData = {
     id: "1",
     queueNumber: "CARD-001",
     status: "InProgress",
-    serviceType: "General Consultation",
     department: "Cardiology",
     priority: "Medium",
     joinedAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
@@ -77,7 +76,6 @@ const MOCK_DOCTOR_DATA: ActiveQueueData = {
       id: "2",
       queueNumber: "CARD-002",
       status: "Waiting",
-      serviceType: "Specialist",
       department: "Cardiology",
       priority: "High",
       joinedAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
@@ -87,7 +85,6 @@ const MOCK_DOCTOR_DATA: ActiveQueueData = {
       id: "3",
       queueNumber: "CARD-003",
       status: "Waiting",
-      serviceType: "General Consultation",
       department: "Cardiology",
       priority: "Urgent",
       joinedAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
@@ -97,7 +94,6 @@ const MOCK_DOCTOR_DATA: ActiveQueueData = {
       id: "4",
       queueNumber: "CARD-004",
       status: "Waiting",
-      serviceType: "General Consultation",
       department: "Cardiology",
       priority: "Medium",
       joinedAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
@@ -107,7 +103,6 @@ const MOCK_DOCTOR_DATA: ActiveQueueData = {
       id: "5",
       queueNumber: "CARD-005",
       status: "Waiting",
-      serviceType: "General Consultation",
       department: "Cardiology",
       priority: "Low",
       joinedAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
@@ -282,13 +277,14 @@ export default function DoctorDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Cardiology">Cardiology</SelectItem>
-                    <SelectItem value="Laboratory">Laboratory</SelectItem>
-                    <SelectItem value="Radiology">Radiology</SelectItem>
-                    <SelectItem value="Pharmacy">Pharmacy</SelectItem>
+                    <SelectItem value="Family Medicine">Family Medicine</SelectItem>
+                    <SelectItem value="Pediatrics">Pediatrics</SelectItem>
+                    <SelectItem value="Gynecology">Gynecology</SelectItem>
                     <SelectItem value="Emergency">Emergency</SelectItem>
-                    <SelectItem value="General Medicine">
-                      General Medicine
-                    </SelectItem>
+                    <SelectItem value="General Surgery">General Surgery</SelectItem>
+                    <SelectItem value="Orthopedics">Orthopedics</SelectItem>
+                    <SelectItem value="Neurology">Neurology</SelectItem>
+                    <SelectItem value="Internal Medicine">Internal Medicine</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -473,10 +469,10 @@ export default function DoctorDashboard() {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-muted-foreground">
-                            {t("serviceType")}
+                            {t("department")}
                           </p>
                           <p className="font-medium">
-                            {data.currentPatient.serviceType}
+                            {data.currentPatient.department}
                           </p>
                         </div>
                         <div>

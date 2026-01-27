@@ -32,7 +32,7 @@ Unlike standalone queuing tools, this system is designed to integrate seamlessly
 - **Optimize Patient Flow:** Reduce wait times through intelligent queue allocation and estimation.
 - **Real-time Visibility:** Provide patients and staff with live status updates via digital displays and SMS.
 - **Accessibility:** Ensure inclusivity with Amharic/English support and voice-based announcements for visually impaired patients.
-- **Operational Efficiency:** specialized dashboards for Doctors and Lab Technicians to manage service delivery.
+- **Operational Efficiency:** specialized dashboards for Doctors, Nurses, and Administrative staff to manage service delivery.
 
 ---
 
@@ -104,7 +104,7 @@ The DQMS employs a modular, **Client-Server Architecture** utilizing a Layered A
 
 ### Patient Check-in & Assignment
 
-1.  **Initiation:** Patient enters Card Number at Reception or Kiosk.
+1.  **Initiation:** Patient enters Card Number and selects Department at Reception or Kiosk.
 2.  **Verification:** System queries local DB (and optionally Ewket EMR) to validate usage.
 3.  **Calculation:** Algorithm computes EWT based on:
     - Current active doctors in the department.
@@ -121,12 +121,17 @@ The DQMS employs a modular, **Client-Server Architecture** utilizing a Layered A
 3.  **Broadcast:** Backend emits `socket.emit('queue:call', { ticket: 'CARD-001', room: 'Rm 3' })`.
 4.  **Activity Log:** Action is recorded in `ActivityLogs` table with timestamp and actor UUID.
 
-### Laboratory Integration Workflow
+### Available Departments
 
-1.  **referral:** Doctor requests Lab Work.
-2.  **Test Processing:** Lab Tech processes sample.
-3.  **Completion:** Tech marks "Results Ready".
-4.  **Trigger:** System sends SMS to patient: "Your results are ready. Please proceed to Doctor X."
+- **Cardiology:** Heart and cardiovascular conditions
+- **Family Medicine:** General primary care
+- **Pediatrics:** Child healthcare
+- **Gynecology:** Women's health
+- **Emergency:** Urgent medical care
+- **General Surgery:** Surgical procedures
+- **Orthopedics:** Bone and joint conditions
+- **Neurology:** Nervous system disorders
+- **Internal Medicine:** Adult medical conditions
 
 ---
 

@@ -44,7 +44,6 @@ api.interceptors.response.use(
 export type UserRole = 'Patient' | 'Doctor' | 'Lab Technician' | 'Admin';
 export type Priority = 'Low' | 'Medium' | 'High' | 'Urgent';
 export type QueueStatus = 'Waiting' | 'InProgress' | 'Complete' | 'Cancelled';
-export type ServiceType = 'General Consultation' | 'Specialist' | 'Laboratory' | 'Radiology' | 'Pharmacy' | 'Emergency';
 
 export interface User {
   id: string;
@@ -80,7 +79,6 @@ export interface Queue {
   id: string;
   queueNumber: string;
   status: QueueStatus;
-  serviceType: ServiceType;
   department: string;
   priority: Priority;
   joinedAt: string;
@@ -185,7 +183,6 @@ export const queueApi = {
   request: (data: {
     cardNumber: string;
     department: string;
-    serviceType: ServiceType;
     priority: Priority;
   }) => api.post<ApiResponse<{
     queue: Queue;
@@ -232,9 +229,10 @@ export const queueApi = {
   // Authenticated endpoints
   getQueues: () => api.get<ApiResponse<{ queues: Queue[] }>>('/queues'),
 
+  getPatientProfile: () => api.get<ApiResponse<{ patient: Patient }>>('/queues/patient-profile'),
+
   createQueue: (data: {
     patientId: string;
-    serviceType: ServiceType;
     department: string;
     priority: Priority;
     notes?: string;

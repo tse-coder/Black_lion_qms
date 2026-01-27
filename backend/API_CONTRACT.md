@@ -911,17 +911,4 @@ All endpoints return errors in the following format:
 
 ---
 
-## Testing with Mock EMR Cards
-
-Use these test card numbers for testing patient check-in:
-- `CARD-001` - Abebe Kebede (Male, 38, Hypertension, Diabetes)
-- `CARD-002` - Tigist Haile (Female, 31, No conditions)
-- `CARD-003` - Mohamed Hassan (Male, 45, Asthma)
-- `CARD-004` - Almaz Bekele (Female, 58, Hypertension, Arthritis)
-- `CARD-005` - Samuel Tadesse (Male, 22, No conditions)
-
----
-
-*This document will be updated as new endpoints are implemented.*
-
 *This document will be updated as new endpoints are implemented.*

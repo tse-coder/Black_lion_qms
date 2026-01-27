@@ -7,13 +7,14 @@ const getQueueDisplay = async (req, res) => {
     // List of predefined departments for consistent high-end UI
     const PREDEFINED_DEPARTMENTS = [
       'Cardiology',
-      'Laboratory',
-      'Radiology',
-      'Pharmacy',
-      'Emergency',
-      'General Medicine',
-      'Orthopedics',
+      'Family Medicine',
       'Pediatrics',
+      'Gynecology',
+      'Emergency',
+      'General Surgery',
+      'Orthopedics',
+      'Neurology',
+      'Internal Medicine',
     ];
 
     const departmentQueues = [];

@@ -9,7 +9,7 @@ const getActiveQueues = async (req, res) => {
     const doctorId = req.user.id;
 
     // For now, we'll prioritized: 1. Query Param, 2. Derivation, 3. Default
-    const doctorDepartment = req.query.department || await getDoctorDepartment(doctorId) || 'General Medicine';
+    const doctorDepartment = req.query.department || await getDoctorDepartment(doctorId) || 'Internal Medicine';
 
     if (!doctorDepartment) {
       return res.status(400).json({
@@ -438,7 +438,7 @@ const getDoctorDepartment = async (doctorId) => {
       attributes: ['department'],
     });
 
-    return waitingQueue ? waitingQueue.department : 'General Medicine';
+    return waitingQueue ? waitingQueue.department : 'Internal Medicine';
   } catch (error) {
     console.error('Error getting doctor department:', error);
     return null;

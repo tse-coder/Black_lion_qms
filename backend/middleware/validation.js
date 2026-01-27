@@ -94,20 +94,19 @@ const queueSchema = Joi.object({
     'string.uuid': 'Patient ID must be a valid UUID',
     'any.required': 'Patient ID is required',
   }),
-  serviceType: Joi.string().valid(
-    'General Consultation',
-    'Specialist',
-    'Laboratory',
-    'Radiology',
-    'Pharmacy',
-    'Emergency'
+  serviceType: Joi.string().optional(),
+  department: Joi.string().valid(
+    'Cardiology',
+    'Family Medicine',
+    'Pediatrics', 
+    'Gynecology',
+    'Emergency',
+    'General Surgery',
+    'Orthopedics',
+    'Neurology',
+    'Internal Medicine'
   ).required().messages({
-    'any.only': 'Service type must be one of: General Consultation, Specialist, Laboratory, Radiology, Pharmacy, Emergency',
-    'any.required': 'Service type is required',
-  }),
-  department: Joi.string().min(2).max(100).required().messages({
-    'string.min': 'Department name must be at least 2 characters long',
-    'string.max': 'Department name must not exceed 100 characters',
+    'any.only': 'Department must be one of: Cardiology, Family Medicine, Pediatrics, Gynecology, Emergency, General Surgery, Orthopedics, Neurology, Internal Medicine',
     'any.required': 'Department is required',
   }),
   priority: Joi.string().valid('Low', 'Medium', 'High', 'Urgent').default('Medium').messages({

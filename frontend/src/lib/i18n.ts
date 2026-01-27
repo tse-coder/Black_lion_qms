@@ -79,13 +79,14 @@ export const translations = {
 
     // Departments
     cardiology: 'Cardiology',
-    laboratory: 'Laboratory',
-    radiology: 'Radiology',
-    pharmacy: 'Pharmacy',
-    emergency: 'Emergency',
-    generalMedicine: 'General Medicine',
-    orthopedics: 'Orthopedics',
+    familyMedicine: 'Family Medicine',
     pediatrics: 'Pediatrics',
+    gynecology: 'Gynecology',
+    emergency: 'Emergency',
+    generalSurgery: 'General Surgery',
+    orthopedics: 'Orthopedics',
+    neurology: 'Neurology',
+    internalMedicine: 'Internal Medicine',
 
     // Service Types
     generalConsultation: 'General Consultation',
@@ -287,14 +288,15 @@ export const translations = {
     low: 'ዝቅተኛ',
 
     // Departments
-    cardiology: 'የልብ ክፍል',
-    laboratory: 'ላቦራቶሪ',
-    radiology: 'ራዲዮሎጂ',
-    pharmacy: 'ፋርማሲ',
+    cardiology: 'ካልብ ክፍል',
+    familyMedicine: 'ቤቅላም',
+    pediatrics: 'ልልድልል',
+    gynecology: 'ገንዘብ ክፍል',
     emergency: 'ድንገተኛ',
-    generalMedicine: 'ጠቅላላ ህክምና',
+    generalSurgery: 'ገለልርር',
     orthopedics: 'ኦርቶፔዲክስ',
-    pediatrics: 'የህፃናት',
+    neurology: 'ነርሮሎጂ',
+    internalMedicine: 'ውትንርምና',
 
     // Service Types
     generalConsultation: 'ጠቅላላ ምክክር',

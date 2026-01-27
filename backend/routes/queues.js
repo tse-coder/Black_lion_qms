@@ -57,11 +57,6 @@ router.get('/', async (req, res) => {
         };
         break;
       
-      case 'Lab Technician':
-        // Lab technicians can see laboratory queues
-        whereClause.serviceType = 'Laboratory';
-        break;
-      
       case 'Admin':
         // Admins can see all queues
         include.push({
@@ -97,12 +92,11 @@ router.post('/',
   validate(queueSchema),
   async (req, res) => {
     try {
-      const { patientId, serviceType, department, priority, notes } = req.body;
+      const { patientId, department, priority, notes } = req.body;
 
       // Generate unique queue number
       const queueCount = await db.Queue.count({
         where: {
-          serviceType,
           department,
           createdAt: {
             [Sequelize.Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)),
@@ -110,7 +104,8 @@ router.post('/',
         },
       });
 
-      const queueNumber = `${serviceType.substring(0, 3).toUpperCase()}-${String(queueCount + 1).padStart(3, '0')}`;
+      const deptCode = department.substring(0, 3).toUpperCase();
+      const queueNumber = `${deptCode}-${String(queueCount + 1).padStart(3, '0')}`;
 
       // Assign doctor if not provided and user is a doctor
       let doctorId = req.body.doctorId;
@@ -121,12 +116,13 @@ router.post('/',
       const queue = await db.Queue.create({
         queueNumber,
         patientId,
-        serviceType,
         department,
         doctorId,
         priority: priority || 'Medium',
-        notes,
+        status: 'Waiting',
         joinedAt: new Date(),
+        lastUpdated: new Date(),
+        notes: notes || null,
       });
 
       // Fetch the created queue with associations
@@ -243,10 +239,9 @@ router.put('/:queueId/next',
         lastUpdated: new Date(),
       });
 
-      // Find next waiting patient in the same department/service
+      // Find next waiting patient in the same department
       const nextQueue = await db.Queue.findOne({
         where: {
-          serviceType: currentQueue.serviceType,
           department: currentQueue.department,
           status: 'Waiting',
         },
@@ -289,6 +284,59 @@ router.put('/:queueId/next',
       res.status(500).json({
         error: 'Internal Server Error',
         message: 'Failed to call next patient',
+      });
+    }
+  }
+);
+
+// Get patient profile (Patients only)
+router.get('/patient-profile', 
+  checkRole('Patient'),
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+
+      // Find patient profile for the authenticated user
+      const patient = await db.Patient.findOne({
+        where: { userId },
+        attributes: ['id', 'cardNumber', 'medicalRecordNumber', 'dateOfBirth', 'gender', 'bloodType', 'allergies', 'chronicConditions'],
+        include: [
+          {
+            model: db.User,
+            as: 'user',
+            attributes: ['firstName', 'lastName', 'phoneNumber', 'email'],
+          },
+        ],
+      });
+
+      if (!patient) {
+        return res.status(404).json({
+          error: 'Not Found',
+          message: 'Patient profile not found',
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          patient: {
+            id: patient.id,
+            cardNumber: patient.cardNumber,
+            medicalRecordNumber: patient.medicalRecordNumber,
+            dateOfBirth: patient.dateOfBirth,
+            gender: patient.gender,
+            bloodType: patient.bloodType,
+            allergies: patient.allergies,
+            chronicConditions: patient.chronicConditions,
+            user: patient.user,
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Get patient profile error:', error);
+      res.status(500).json({
+        error: 'Internal Server Error',
+        message: 'Failed to fetch patient profile',
       });
     }
   }

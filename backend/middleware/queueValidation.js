@@ -6,21 +6,19 @@ const queueRequestSchema = Joi.object({
     'any.required': 'Card number is required',
     'string.empty': 'Card number cannot be empty',
   }),
-  department: Joi.string().min(2).max(100).required().messages({
-    'string.min': 'Department name must be at least 2 characters long',
-    'string.max': 'Department name must not exceed 100 characters',
-    'any.required': 'Department is required',
-  }),
-  serviceType: Joi.string().valid(
-    'General Consultation',
-    'Specialist',
-    'Laboratory',
-    'Radiology',
-    'Pharmacy',
-    'Emergency'
+  department: Joi.string().valid(
+    'Cardiology',
+    'Family Medicine',
+    'Pediatrics',
+    'Gynecology',
+    'Emergency',
+    'General Surgery',
+    'Orthopedics',
+    'Neurology',
+    'Internal Medicine'
   ).required().messages({
-    'any.only': 'Service type must be one of: General Consultation, Specialist, Laboratory, Radiology, Pharmacy, Emergency',
-    'any.required': 'Service type is required',
+    'any.only': 'Department must be one of: Cardiology, Family Medicine, Pediatrics, Gynecology, Emergency, General Surgery, Orthopedics, Neurology, Internal Medicine',
+    'any.required': 'Department is required',
   }),
   priority: Joi.string().valid('Low', 'Medium', 'High', 'Urgent').default('Medium').messages({
     'any.only': 'Priority must be one of: Low, Medium, High, Urgent',

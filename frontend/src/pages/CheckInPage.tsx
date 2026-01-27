@@ -28,7 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { queueApi, Priority, ServiceType } from "@/lib/api";
+import { queueApi, Priority } from "@/lib/api";
 import { TicketCard } from "@/components/queue";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ArrowLeft, ClipboardCheck, Sparkles } from "lucide-react";
@@ -36,28 +36,19 @@ import { Link } from "react-router-dom";
 
 const DEPARTMENTS = [
   "Cardiology",
-  "Laboratory",
-  "Radiology",
-  "Pharmacy",
-  "Emergency",
-  "General Medicine",
-  "Orthopedics",
+  "Family Medicine",
   "Pediatrics",
-];
-
-const SERVICE_TYPES: ServiceType[] = [
-  "General Consultation",
-  "Specialist",
-  "Laboratory",
-  "Radiology",
-  "Pharmacy",
+  "Gynecology",
   "Emergency",
+  "General Surgery",
+  "Orthopedics",
+  "Neurology",
+  "Internal Medicine",
 ];
 
 const checkInSchema = z.object({
   cardNumber: z.string().min(3, "Card number must be at least 3 characters"),
   department: z.string().min(1, "Please select a department"),
-  serviceType: z.string().min(1, "Please select a service type"),
   priority: z.enum(["Low", "Medium", "High", "Urgent"] as const),
 });
 
@@ -73,7 +64,6 @@ export default function CheckInPage() {
     defaultValues: {
       cardNumber: "",
       department: "",
-      serviceType: "",
       priority: "Medium",
     },
   });
@@ -85,7 +75,6 @@ export default function CheckInPage() {
       const response = await queueApi.request({
         cardNumber: values.cardNumber,
         department: values.department,
-        serviceType: values.serviceType as ServiceType,
         priority: values.priority,
       });
 
@@ -193,39 +182,6 @@ export default function CheckInPage() {
                               {DEPARTMENTS.map((dept) => (
                                 <SelectItem key={dept} value={dept}>
                                   {dept}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Service Type */}
-                    <FormField
-                      control={form.control}
-                      name="serviceType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-bold uppercase tracking-wider">
-                            {t("selectServiceType")} *
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-12 border-gray-200 focus:ring-2 focus:ring-primary/20">
-                                <SelectValue
-                                  placeholder={t("selectServiceType")}
-                                />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {SERVICE_TYPES.map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type}
                                 </SelectItem>
                               ))}
                             </SelectContent>
