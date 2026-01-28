@@ -59,16 +59,19 @@ router.get('/history',
           }]
         }]
       });
-
-      res.status(200).json({
+      
+      res.json({
         success: true,
-        data: { notifications },
+        data: {
+          notifications,
+          total: notifications.length
+        }
       });
     } catch (error) {
       console.error('Get notification history error:', error);
       res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Failed to fetch notification history',
+        success: false,
+        message: 'Failed to fetch notification history'
       });
     }
   }

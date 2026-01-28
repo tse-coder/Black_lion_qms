@@ -5,6 +5,7 @@ import Queue from './Queue.js';
 import Appointment from './Appointment.js';
 import ActivityLog from './ActivityLog.js';
 import LabRequest from './LabRequest.js';
+import Notification from './Notification.js';
 
 // Define associations
 User.hasOne(Patient, {
@@ -68,6 +69,17 @@ ActivityLog.belongsTo(User, {
   as: 'user',
 });
 
+// Notification Associations
+Notification.belongsTo(Patient, {
+  foreignKey: 'patientId',
+  as: 'patient',
+});
+
+Patient.hasMany(Notification, {
+  foreignKey: 'patientId',
+  as: 'notifications',
+});
+
 // Export models and sequelize instance
 const db = {
   sequelize,
@@ -77,6 +89,7 @@ const db = {
   Appointment,
   LabRequest,
   ActivityLog,
+  Notification,
 };
 
 export default db;
