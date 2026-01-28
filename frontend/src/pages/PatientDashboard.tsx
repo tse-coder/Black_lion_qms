@@ -90,31 +90,32 @@ export default function PatientDashboard() {
 
   return (
     <MainLayout title="My Healthcare Dashboard">
-      <div className="min-h-[calc(100vh-4rem)] py-6 px-4">
-        <div className="container mx-auto max-w-4xl">
+      <div className="min-h-[calc(100vh-4rem)] py-3 px-3">
+        <div className="container mx-auto max-w-4xl space-y-4 lg:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">{t('patientDashboard')}</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-xl lg:text-2xl xl:text-3xl font-bold">{t('patientDashboard')}</h1>
+              <p className="text-sm lg:text-base text-muted-foreground">
                 Welcome back, {user?.firstName} {user?.lastName}
               </p>
             </div>
-            <Button variant="outline" onClick={fetchData} disabled={isLoading}>
+            <Button variant="outline" onClick={fetchData} disabled={isLoading} className="w-fit">
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
+              <span className="hidden sm:inline">Refresh</span>
+              <span className="sm:hidden">↻</span>
             </Button>
           </div>
 
           {/* Profile Card */}
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                  <User className="h-8 w-8 text-primary" />
+          <Card>
+            <CardContent className="pt-4 lg:pt-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="w-12 h-12 lg:w-16 lg:h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                  <User className="h-6 w-6 lg:h-8 lg:w-8 text-primary" />
                 </div>
-                <div>
-                  <h2 className="text-xl font-semibold">
+                <div className="text-center sm:text-left">
+                  <h2 className="text-lg lg:text-xl font-semibold">
                     {user?.firstName} {user?.lastName}
                   </h2>
                   <p className="text-muted-foreground">{user?.email}</p>

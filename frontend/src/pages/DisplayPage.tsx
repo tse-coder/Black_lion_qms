@@ -202,27 +202,27 @@ export default function DisplayPage() {
                 }`}
               >
                 {dept.currentlyServing ? (
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="text-center sm:text-left">
+                      <p className="text-[8px] sm:text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">
                         {t("current")}
                       </p>
-                      <p className="text-3xl font-black text-foreground tracking-tighter leading-none mt-1">
+                      <p className="text-2xl sm:text-3xl font-black text-foreground tracking-tighter leading-none mt-1">
                         {dept.currentlyServing.queueNumber}
                       </p>
                     </div>
-                    <div className="text-right flex-1 ml-4">
-                      <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1 truncate">
+                    <div className="text-center sm:text-right flex-1 sm:ml-4">
+                      <p className="text-xs sm:text-[10px] font-black text-primary uppercase tracking-widest mb-1 truncate">
                         {dept.currentlyServing.patientName}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between opacity-20">
-                    <p className="text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase italic">
+                  <div className="flex items-center justify-center sm:justify-between opacity-20">
+                    <p className="text-[8px] sm:text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase italic text-center">
                       {t("standby")}
                     </p>
-                    <Clock className="h-5 w-5 text-muted-foreground" />
+                    <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hidden sm:block" />
                   </div>
                 )}
               </div>

@@ -155,7 +155,7 @@ export default function RegisterPage() {
 
   return (
     <MainLayout showHeader={false} title={t("registerAccount")}>
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-8 px-4 bg-gradient-to-br from-background to-secondary/20">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-4 px-3 lg:py-8 lg:px-4 bg-gradient-to-br from-background to-secondary/20">
         <div className="w-full max-w-2xl">
           <Button
             variant="ghost"
@@ -164,13 +164,14 @@ export default function RegisterPage() {
           >
             <Link to="/login">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {t("backToLogin")}
+              <span className="hidden sm:inline">{t("backToLogin")}</span>
+              <span className="sm:hidden">← Back</span>
             </Link>
           </Button>
 
           <Card className="border-none shadow-2xl bg-white/80 backdrop-blur-md">
             <CardHeader className="text-center pb-2">
-              <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-primary/10 rounded-2xl p-2 shadow-inner">
+              <div className="w-16 h-16 lg:w-20 lg:h-20 mx-auto mb-3 lg:mb-4 flex items-center justify-center bg-primary/10 rounded-2xl p-2 shadow-inner">
                 <img
                   src="/logo.png"
                   alt="Black Lion Hospital QMS"
@@ -197,7 +198,7 @@ export default function RegisterPage() {
                       Account Information
                     </h3>
                     <Separator />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="firstName"
@@ -234,7 +235,7 @@ export default function RegisterPage() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="username"
@@ -290,7 +291,7 @@ export default function RegisterPage() {
                           </FormItem>
                         )}
                       />
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
                           name="password"

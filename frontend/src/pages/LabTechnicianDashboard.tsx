@@ -120,23 +120,24 @@ export default function LabTechnicianDashboard() {
   return (
     <MainLayout>
       <div className="min-h-[calc(100vh-4rem)] py-3 px-3">
-        <div className="container mx-auto space-y-6">
+        <div className="container mx-auto space-y-4 lg:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Lab Technician Dashboard</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-xl lg:text-2xl xl:text-3xl font-bold">Lab Technician Dashboard</h1>
+              <p className="text-sm lg:text-base text-muted-foreground">
                 Review and approve patient queue requests
               </p>
             </div>
-            <Button variant="outline" onClick={fetchData} disabled={isLoading}>
+            <Button variant="outline" onClick={fetchData} disabled={isLoading} className="w-fit">
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
-              Refresh
+              <span className="hidden sm:inline">Refresh</span>
+              <span className="sm:hidden">↻</span>
             </Button>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4">
           <Card>
             <CardContent className="pt-3 pb-3">
               <div className="flex items-center gap-2">
@@ -221,37 +222,37 @@ export default function LabTechnicianDashboard() {
               {pendingQueues.length} queues waiting for review
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[500px] pr-4">
+          <CardContent className="pt-0">
+            <ScrollArea className="h-[400px] lg:h-[500px] pr-2 lg:pr-4">
               {pendingQueues.length > 0 ? (
                 <div className="space-y-3">
                   {pendingQueues.map((queue: any, index: number) => (
                     <div
                       key={queue.id}
-                      className="p-4 rounded-lg border hover:bg-secondary/50 transition-colors"
+                      className="p-3 lg:p-4 rounded-lg border hover:bg-secondary/50 transition-colors"
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono font-bold text-lg">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-2 lg:gap-3 flex-wrap">
+                          <span className="font-mono font-bold text-sm lg:text-lg">
                             {queue.queueNumber}
                           </span>
-                          <Badge className={getPriorityColor(queue.priority)}>
+                          <Badge className={`${getPriorityColor(queue.priority)} text-xs`}>
                             {queue.priority}
                           </Badge>
-                          <Badge variant="outline">{queue.department}</Badge>
+                          <Badge variant="outline" className="text-xs">{queue.department}</Badge>
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           #{index + 1}
                         </span>
                       </div>
                       <div className="mb-3">
-                        <p className="font-medium text-lg mb-1">
+                        <p className="font-medium text-sm lg:text-lg mb-1">
                           {queue.patient?.user?.firstName} {queue.patient?.user?.lastName}
                         </p>
-                        <p className="text-sm text-muted-foreground mb-1">
+                        <p className="text-xs lg:text-sm text-muted-foreground mb-1">
                           Card: {queue.patient?.cardNumber}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs lg:text-sm text-muted-foreground">
                           Phone: {queue.patient?.user?.phoneNumber}
                         </p>
                       </div>
@@ -261,7 +262,7 @@ export default function LabTechnicianDashboard() {
                           addSuffix: true,
                         })}
                       </div>
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-2 lg:gap-3">
                         <Button
                           onClick={() => handleApprove(queue.id)}
                           disabled={isApproving === queue.id || isRejecting === queue.id}

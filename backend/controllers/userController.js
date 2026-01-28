@@ -4,6 +4,28 @@ import { validate, userRegistrationSchema } from '../middleware/validation.js';
 import bcrypt from 'bcrypt';
 import { Sequelize } from 'sequelize';
 
+const generateUniquePatientIdentifiers = async (transaction) => {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const timestamp = Date.now();
+    const randomPart = Math.floor(1000 + Math.random() * 9000);
+    const cardNumber = `CARD-${new Date().getFullYear()}-${randomPart}`;
+    const medicalRecordNumber = `MRN-${timestamp.toString().slice(-6)}-${randomPart}`;
+
+    const existingPatient = await db.Patient.findOne({
+      where: {
+        [Sequelize.Op.or]: [{ cardNumber }, { medicalRecordNumber }]
+      },
+      transaction
+    });
+
+    if (!existingPatient) {
+      return { cardNumber, medicalRecordNumber };
+    }
+  }
+
+  throw new Error('Failed to generate unique patient identifiers');
+};
+
 // User Registration (Unified for Patient)
 const register = async (req, res) => {
   const transaction = await db.sequelize.transaction();
@@ -60,16 +82,12 @@ const register = async (req, res) => {
 
     // If role is Patient, create patient profile
     if (role === 'Patient') {
-      // Auto-generate Card Number and MRN
-      const timestamp = Date.now();
-      const randomPart = Math.floor(1000 + Math.random() * 9000);
-      const generatedCardNumber = `CARD-${new Date().getFullYear()}-${randomPart}`;
-      const generatedMRN = `MRN-${timestamp.toString().slice(-6)}-${randomPart}`;
+      const { cardNumber, medicalRecordNumber } = await generateUniquePatientIdentifiers(transaction);
 
       await db.Patient.create({
         userId: user.id,
-        cardNumber: generatedCardNumber,
-        medicalRecordNumber: generatedMRN,
+        cardNumber,
+        medicalRecordNumber,
         dateOfBirth,
         gender,
         address,
@@ -109,7 +127,23 @@ const register = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('Registration error:', error);
-    res.status(500).json({
+
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'Invalid input data',
+        details: error.errors?.map((detail) => detail.message) || []
+      });
+    }
+
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({
+        error: 'User Already Exists',
+        message: 'A user with this email or username already exists',
+      });
+    }
+
+    return res.status(500).json({
       error: 'Internal Server Error',
       message: 'Registration failed. Please try again.',
     });

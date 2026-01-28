@@ -256,23 +256,23 @@ export default function DoctorDashboard() {
       <div className="min-h-[calc(100vh-4rem)] py-3 px-3">
         <div className="container mx-auto">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                 {t("doctorDashboard")}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm md:text-base">
                 {t("welcomeBack")}, Dr. {user?.firstName} {user?.lastName}
               </p>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-end mr-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex flex-col sm:items-end">
                 <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none mb-1">
                   Active Department
                 </span>
                 <Select value={activeDept} onValueChange={setActiveDept}>
-                  <SelectTrigger className="w-[180px] h-9 bg-white border-primary/20 focus:ring-primary/20">
+                  <SelectTrigger className="w-full sm:w-[180px] h-9 bg-white border-primary/20 focus:ring-primary/20">
                     <SelectValue placeholder="Select Dept" />
                   </SelectTrigger>
                   <SelectContent>
@@ -292,12 +292,14 @@ export default function DoctorDashboard() {
                 <RefreshCw
                   className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
                 />
-                {t("refresh")}
+                <span className="hidden sm:inline">{t("refresh")}</span>
+                <span className="sm:hidden">Refresh</span>
               </Button>
             </div>
-          </div>{" "}
+          </div>
+
           {/* Statistics Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
             <Card>
               <CardContent className="pt-3 pb-3">
                 <div className="flex items-center gap-2">
@@ -376,20 +378,20 @@ export default function DoctorDashboard() {
             </Card>
           </div>
           {/* Main Content */}
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
             {/* Waiting Patients List */}
             <Card className="lg:col-span-1">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
                   <Users className="h-5 w-5" />
                   {t("waitingPatients")}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sm">
                   {sortedWaitingPatients.length} patients in queue
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px] pr-4">
+              <CardContent className="pt-0">
+                <ScrollArea className="h-[300px] lg:h-[400px] pr-2 lg:pr-4">
                   {sortedWaitingPatients.length > 0 ? (
                     <div className="space-y-3">
                       {sortedWaitingPatients.map((patient, index) => (

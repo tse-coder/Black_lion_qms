@@ -185,7 +185,7 @@ const logout = async (req, res) => {
         userId: req.user.id,
         type: 'AUTH',
         action: 'LOGOUT',
-        description: `User ${user.firstName} logged out`,
+        description: `User ${req.user.firstName} logged out`,
         req
       });
     }

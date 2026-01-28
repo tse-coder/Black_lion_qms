@@ -101,30 +101,31 @@ export default function CheckInPage() {
 
   return (
     <MainLayout title={t("checkInTitle")}>
-      <div className="min-h-[calc(100vh-4rem)] py-12 px-4 bg-gradient-to-b from-primary/5 to-background">
+      <div className="min-h-[calc(100vh-4rem)] py-6 px-3 lg:py-12 lg:px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto max-w-md">
           {/* Back Button */}
           <Button
             variant="ghost"
             asChild
-            className="mb-6 hover:bg-white/50 backdrop-blur-sm transition-all"
+            className="mb-4 lg:mb-6 hover:bg-white/50 backdrop-blur-sm transition-all"
           >
             <Link to="/">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {t("back")}
+              <span className="hidden sm:inline">{t("back")}</span>
+              <span className="sm:hidden">←</span>
             </Link>
           </Button>
 
           {!ticketData ? (
             <Card className="border-none shadow-xl bg-white/80 backdrop-blur-md">
               <CardHeader className="text-center pb-2">
-                <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-primary/10 rounded-full text-primary">
-                  <ClipboardCheck className="h-8 w-8" />
+                <div className="w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-3 lg:mb-4 flex items-center justify-center bg-primary/10 rounded-full text-primary">
+                  <ClipboardCheck className="h-6 w-6 lg:h-8 lg:w-8" />
                 </div>
-                <CardTitle className="text-3xl font-extrabold tracking-tight">
+                <CardTitle className="text-2xl lg:text-3xl font-extrabold tracking-tight">
                   {t("checkInTitle")}
                 </CardTitle>
-                <CardDescription className="text-base">
+                <CardDescription className="text-sm lg:text-base">
                   {t("checkInDescription")}
                 </CardDescription>
               </CardHeader>
