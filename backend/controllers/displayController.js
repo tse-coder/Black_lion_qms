@@ -22,11 +22,11 @@ const getQueueDisplay = async (req, res) => {
     // For each department, get current serving and waiting patients
     for (const departmentName of PREDEFINED_DEPARTMENTS) {
 
-      // Get currently serving patient (InProgress)
+      // Get currently serving patient (InProgress) - only approved queues
       const currentServing = await db.Queue.findOne({
         where: {
           department: departmentName,
-          status: 'InProgress',
+          status: 'InProgress', // Only approved queues
         },
         include: [
           {
@@ -49,11 +49,11 @@ const getQueueDisplay = async (req, res) => {
         order: [['serviceStartTime', 'ASC']],
       });
 
-      // Get next 5 waiting patients
+      // Get next 5 waiting patients (Waiting) - only approved queues
       const waitingPatients = await db.Queue.findAll({
         where: {
           department: departmentName,
-          status: 'Waiting',
+          status: 'Waiting', // Only approved queues
         },
         include: [
           {

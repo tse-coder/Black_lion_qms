@@ -37,9 +37,9 @@ const Queue = sequelize.define('Queue', {
     onDelete: 'SET NULL',
   },
   status: {
-    type: DataTypes.ENUM('Waiting', 'InProgress', 'Complete', 'Cancelled'),
+    type: DataTypes.ENUM('PendingLabApproval', 'Waiting', 'InProgress', 'Complete', 'Cancelled'),
     allowNull: false,
-    defaultValue: 'Waiting',
+    defaultValue: 'PendingLabApproval',
   },
   priority: {
     type: DataTypes.ENUM('Low', 'Medium', 'High', 'Urgent'),

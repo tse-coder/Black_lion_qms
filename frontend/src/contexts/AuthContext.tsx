@@ -50,6 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(null);
         }
       }
+      
       setIsLoading(false);
     };
 
@@ -59,50 +60,58 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      console.log('[AUTH] Starting login process');
-      console.log('[AUTH] Login attempt:', { email, password: '[HIDDEN]' });
-      
-      // Real API call using authApi.login
       const response = await authApi.login(email, password);
-      console.log('[AUTH] API Response:', response.data);
       
       if (response.data.success) {
-        const { user: userData, token: authToken } = response.data.data;
+        const { token, user } = response.data.data;
         
-        setUser(userData);
-        setToken(authToken);
-        localStorage.setItem('token', authToken);
-        localStorage.setItem('user', JSON.stringify(userData));
+        setToken(token);
+        setUser(user);
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
         
-        console.log('[AUTH] User data stored in localStorage');
+        // Verify the token works by making a test API call
+        try {
+          const verifyResponse = await authApi.getMe();
+          if (verifyResponse.data.success) {
+            // Token is valid
+          }
+        } catch (verifyError) {
+          // Clear auth state if verification fails
+          setToken(null);
+          setUser(null);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          toast({
+            title: 'Login Error',
+            description: 'Authentication verification failed',
+            variant: 'destructive',
+          });
+          return false;
+        }
         
         toast({
           title: 'Login Successful',
-          description: `Welcome back, ${userData.firstName}!`,
+          description: `Welcome back, ${user.firstName}!`,
         });
-        
-        console.log('[AUTH] Login completed successfully');
         return true;
+      } else {
+        toast({
+          title: 'Login Failed',
+          description: response.data.message || 'Invalid credentials',
+          variant: 'destructive',
+        });
+        return false;
       }
-      return false;
     } catch (error: any) {
-      console.log('[AUTH] Login failed:', error);
-      console.log('[AUTH] Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
-      const message = error.response?.data?.message || 'Invalid email or password';
       toast({
-        title: 'Login Failed',
-        description: message,
+        title: 'Login Error',
+        description: error.response?.data?.message || 'An error occurred during login',
         variant: 'destructive',
       });
       return false;
     } finally {
       setIsLoading(false);
-      console.log('[AUTH] Login process finished');
     }
   }, [toast]);
 

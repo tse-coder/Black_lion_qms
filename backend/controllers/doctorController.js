@@ -18,11 +18,11 @@ const getActiveQueues = async (req, res) => {
       });
     }
 
-    // Get waiting patients for the doctor's department
+    // Get waiting patients for the doctor's department (only approved queues)
     const activeQueues = await db.Queue.findAll({
       where: {
         department: doctorDepartment,
-        status: 'Waiting',
+        status: ['Waiting', 'InProgress'], // Only show approved queues
       },
       include: [
         {

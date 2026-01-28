@@ -17,12 +17,12 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AppointmentPage from "./pages/AppointmentPage";
 import DoctorDashboard from "./pages/DoctorDashboard";
-import LabDashboard from "./pages/LabDashboard";
 import PatientDashboard from "./pages/PatientDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import LabTechnicianDashboard from "./pages/LabTechnicianDashboard";
 
 const queryClient = new QueryClient();
 
@@ -59,7 +59,7 @@ const App = () => (
                     path="/lab"
                     element={
                       <ProtectedRoute allowedRoles="Lab Technician">
-                        <LabDashboard />
+                        <LabTechnicianDashboard />
                       </ProtectedRoute>
                     }
                   />

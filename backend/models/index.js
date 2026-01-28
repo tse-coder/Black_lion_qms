@@ -4,7 +4,7 @@ import Patient from './Patient.js';
 import Queue from './Queue.js';
 import Appointment from './Appointment.js';
 import ActivityLog from './ActivityLog.js';
-import Notification from './Notification.js';
+import LabRequest from './LabRequest.js';
 
 // Define associations
 User.hasOne(Patient, {
@@ -47,6 +47,17 @@ Queue.belongsTo(User, {
   as: 'doctor',
 });
 
+// Lab Request Associations
+LabRequest.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+Patient.hasMany(LabRequest, { foreignKey: 'patientId', as: 'labRequests' });
+
+LabRequest.belongsTo(User, { foreignKey: 'doctorId', as: 'doctor' });
+User.hasMany(LabRequest, { foreignKey: 'doctorId', as: 'doctorLabRequests' });
+
+// Associate LabRequest with Queue to track which visit it belongs to
+LabRequest.belongsTo(Queue, { foreignKey: 'queueId', as: 'queue' });
+Queue.hasMany(LabRequest, { foreignKey: 'queueId', as: 'labRequests' });
+
 User.hasMany(ActivityLog, {
   foreignKey: 'userId',
   as: 'activities',
@@ -57,16 +68,6 @@ ActivityLog.belongsTo(User, {
   as: 'user',
 });
 
-Patient.hasMany(Notification, {
-  foreignKey: 'patientId',
-  as: 'notifications',
-});
-
-Notification.belongsTo(Patient, {
-  foreignKey: 'patientId',
-  as: 'patient',
-});
-
 // Export models and sequelize instance
 const db = {
   sequelize,
@@ -74,8 +75,8 @@ const db = {
   Patient,
   Queue,
   Appointment,
+  LabRequest,
   ActivityLog,
-  Notification,
 };
 
 export default db;

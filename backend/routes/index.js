@@ -12,6 +12,7 @@ import doctorRoutes from './doctor.js';
 import displayRoutes from './display.js';
 import appointmentRoutes from './appointment.js';
 import adminRoutes from './admin.js';
+import labTechnicianRoutes from './labTechnician.js';
 
 // Health check for API
 router.get('/health', (req, res) => {
@@ -32,5 +33,6 @@ router.use('/api', displayRoutes);
 router.use('/api', doctorRoutes);
 router.use('/appointments', appointmentRoutes);
 router.use('/admin', adminRoutes);
+router.use('/lab-technician', labTechnicianRoutes);
 
 export default router;

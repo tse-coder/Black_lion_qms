@@ -43,7 +43,7 @@ api.interceptors.response.use(
 // Types
 export type UserRole = 'Patient' | 'Doctor' | 'Lab Technician' | 'Admin';
 export type Priority = 'Low' | 'Medium' | 'High' | 'Urgent';
-export type QueueStatus = 'Waiting' | 'InProgress' | 'Complete' | 'Cancelled';
+export type QueueStatus = 'PendingLabApproval' | 'Waiting' | 'InProgress' | 'Complete' | 'Cancelled';
 
 export interface User {
   id: string;
@@ -230,6 +230,11 @@ export const queueApi = {
   getQueues: () => api.get<ApiResponse<{ queues: Queue[] }>>('/queues'),
 
   getPatientProfile: () => api.get<ApiResponse<{ patient: Patient }>>('/queues/patient-profile'),
+
+  // Lab Technician endpoints
+  getPendingQueues: () => api.get<ApiResponse<{ queues: Queue[]; totalPending: number }>>('/lab-technician/pending'),
+  approveQueue: (data: { queueId: string }) => api.post<ApiResponse<{ queue: Queue }>>('/lab-technician/approve', data),
+  rejectQueue: (data: { queueId: string; reason?: string }) => api.post<ApiResponse<{ queue: Queue }>>('/lab-technician/reject', data),
 
   createQueue: (data: {
     patientId: string;

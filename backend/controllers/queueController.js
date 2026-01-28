@@ -133,13 +133,13 @@ const requestQueueNumber = async (req, res) => {
     const queueNumber = await generateQueueNumber(department);
     const estimatedWaitTime = await estimateWaitTime(department);
 
-    // Step 4: Create queue entry with status 'Waiting'
+    // Step 4: Create queue entry with status 'PendingLabApproval'
     const queue = await db.Queue.create({
       queueNumber,
       patientId: patient.id,
       department,
       priority,
-      status: 'Waiting',
+      status: 'PendingLabApproval',
       estimatedWaitTime,
       joinedAt: new Date(),
       lastUpdated: new Date(),
