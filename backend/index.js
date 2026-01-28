@@ -80,7 +80,10 @@ const startServer = async () => {
     console.log('Database connection established successfully.');
 
     // Sync database (create tables if they don't exist)
-    await db.sequelize.sync({ alter: true });
+    if (process.env.NODE_ENV === 'development') {
+      await db.sequelize.sync({ alter: true });
+    }
+
     console.log('Database synchronized successfully.');
 
     httpServer.listen(PORT, '0.0.0.0', () => {
